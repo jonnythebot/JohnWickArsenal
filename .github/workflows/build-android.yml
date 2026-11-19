@@ -31,7 +31,7 @@ on:
         type: boolean
 
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'Source/**'
       - 'UnityProject/**'
@@ -39,7 +39,7 @@ on:
       - 'build.sh'
 
   pull_request:
-    branches: [main]
+    branches: [master]
 
   release:
     types: [published]
