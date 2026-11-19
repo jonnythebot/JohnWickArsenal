@@ -233,8 +233,6 @@ jobs:
       UNITY_EXECUTABLE: /opt/unity/Editor/Unity
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
-      PATH: /opt/unity/Editor:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
-    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
