@@ -1,0 +1,21 @@
+{
+  "name": "John Wick Arsenal",
+  "id": "johnwickarsenal",
+  "author": "YourName",
+  "version": "1.0.0",
+  "description": "A comprehensive John Wick weapon pack featuring his most iconic firearms from the film series. Includes 10 weapons: H&K P30L, Glock 34, STI 2011 Combat Master, TTI Pit Viper, Benelli M4, TTI TR-1 Ultralight, Kel-Tec KSG, Remington 1875, Throwing Knives, and the legendary Pencil.",
+  "gameVersion": "1.0.0",
+  "dependencies": [],
+  "loadAfter": [],
+  "category": "Weapons",
+  "tags": ["johnwick", "keanureeves", "firearms", "action", "movie-weapons"],
+  "icon": "icon.png",
+  "assemblyName": "JohnWickArsenal.dll",
+  "assetBundles": [
+    "johnwickarsenal.bundle"
+  ],
+  "settings": {
+    "showInSpawnMenu": true,
+    "spawnMenuCategory": "John Wick Arsenal"
+  }
+}

@@ -1,0 +1,54 @@
+# John Wick Arsenal - Git Ignore
+
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# Unity editor
+/*.csproj
+/*.sln
+/*.pidb
+/*.suo
+/*.user
+/*.userprefs
+/*.unityproj
+/*.booproj
+
+# Visual Studio / Rider
+/.vs/
+/.vscode/
+/*.sln.docstates
+
+# Build outputs
+/Assemblies/
+/AssetBundles/
+/BuildOutput/
+/*.dll
+/*.bundle
+/*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Local settings
+/settings.local.json
+/launchSettings.json
+
+# Mod local config
+/ModConfig/local.*.json
+
+# Backup files
+*.bak
+*.backup

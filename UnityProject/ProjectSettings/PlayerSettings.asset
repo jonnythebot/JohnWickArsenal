@@ -1,0 +1,241 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!130 &1
+PlayerSettings:
+  m_ObjectHideFlags: 0
+  m_ProductName: JohnWickArsenal
+  m_CompanyName: JohnWickArsenal
+  m_DefaultScreenWidth: 1024
+  m_DefaultScreenHeight: 768
+  m_DefaultScreenWidthWeb: 960
+  m_DefaultScreenHeightWeb: 600
+  m_MacAppStoreCategory: public.app-category.games
+  m_IconIsMask: 0
+  m_HideSplashScreen: 0
+  m_UseMacAppStoreValidation: 0
+  m_EnableInternalProfiler: 0
+  m_UseMacAppStoreValidation: 0
+  m_EnableHeadlessMode: 0
+  m_UseOnDemandResources: 0
+  m_ApplicationIdentifier:
+    Android: com.johnwickarsenal.mod
+  m_BuildNumber:
+    Android: 1
+  m_OverrideDefaultPackageName: 0
+  m_AndroidShowActivityIndicatorOnLoading: 1
+  m_AndroidShowActivityIndicatorOnLoadingBlit: 0
+  m_AndroidUseCustomKeystore: 0
+  m_AndroidKeyaliasName:
+  m_AndroidKeyaliasPass:
+  m_AndroidKeystorePass:
+  m_AndroidKeystoreName:
+  m_AndroidMinSdkVersion: 29
+  m_AndroidTargetSdkVersion: 33
+  m_AndroidTargetArchitectures: 4
+  m_AndroidSplashScreenScale: 0
+  m_AndroidUseAPKExpansionFiles: 0
+  m_AndroidEnableTango: 0
+  m_AndroidEnableVr: 0
+  m_AndroidRenderOutsideSafeArea: 1
+  m_AndroidResizableWindow: 0
+  m_AndroidDefaultWindowWidth: 1280
+  m_AndroidDefaultWindowHeight: 720
+  m_AndroidSupportedAspectRatio: 1
+  m_AndroidMaximumAspectRatio: 2.1
+  m_AndroidIsGame: 1
+  m_AndroidUseLowAccuracyLocation: 0
+  m_AndroidUseHighAccuracyLocation: 0
+  m_AndroidEnableBannerAds: 0
+  m_AndroidEnableInterstitialAds: 0
+  m_AndroidEnableLicensing: 0
+  m_AndroidEnableReceiver: 0
+  m_AndroidEnableInAppPurchasing: 0
+  m_AndroidUseCustomAppIcon: 0
+  m_AndroidGamepadSupportLevel: 0
+  m_AndroidGraphicsJobs: 1
+  m_AndroidGraphicsJobsMode: 1
+  m_AndroidIl2CppCompilerConfiguration: 0
+  m_AndroidScriptingBackend: 2
+  m_AndroidApiCompatibilityLevel: 6
+  m_AndroidManagedStrippingLevel: 2
+  m_AndroidStripEngineCode: 1
+  m_AndroidTargetDevices: 0
+  m_AndroidBundleVersionCode: 1
+  m_AndroidMinifyDebug: 0
+  m_AndroidMinifyRelease: 1
+  m_AndroidProguardUserFile: proguard-user.txt
+  m_AndroidProguardFile: proguard.txt
+  m_AndroidEnableProguard: 0
+  m_AndroidEnableR8: 1
+  m_AndroidUseIncrementalGC: 1
+  m_AndroidUseCustomMainGradleTemplate: 0
+  m_AndroidUseCustomGradlePropertiesTemplate: 0
+  m_AndroidUseCustomLauncherGradleTemplate: 0
+  m_AndroidUseCustomMainTemplate: 0
+  m_AndroidUseCustomBaseGradleTemplate: 0
+  m_AndroidUseCustomApplicationGradleTemplate: 0
+  m_AndroidUseCustomSettingsGradleTemplate: 0
+  m_AndroidBundleIdentifier: com.johnwickarsenal.mod
+  m_AndroidVersionName: 1.0.0
+  m_AndroidApplicationId: com.johnwickarsenal.mod
+  m_AndroidUseEmbeddedSDK: 1
+  m_AndroidUseSharedUserId: 0
+  m_AndroidSharedUserId:
+  m_AndroidUseCustomKeystore: 0
+  m_AndroidKeystorePath:
+  m_AndroidKeystorePassword:
+  m_AndroidKeyAlias:
+  m_AndroidKeyPassword:
+  m_AndroidSplitApplicationBinary: 0
+  m_AndroidUseCustomPermissions: 0
+  m_AndroidCustomPermissions: []
+  m_AndroidUseCustomManifest: 0
+  m_AndroidManifestPath:
+  m_AndroidUseCustomActivities: 0
+  m_AndroidActivityClass:
+  m_AndroidUseCustomIntentFilters: 0
+  m_AndroidIntentFilters: []
+  m_AndroidUseCustomMetaData: 0
+  m_AndroidMetaData: []
+  m_AndroidUseCustomAttributes: 0
+  m_AndroidAttributes: []
+  m_AndroidUseCustomUsesFeature: 0
+  m_AndroidUsesFeature: []
+  m_AndroidUseCustomUsesPermission: 0
+  m_AndroidUsesPermission: []
+  m_AndroidUseCustomUsesLibrary: 0
+  m_AndroidUsesLibrary: []
+  m_AndroidUseCustomUsesSdk: 0
+  m_AndroidMinSdkVersion: 29
+  m_AndroidTargetSdkVersion: 33
+  m_AndroidMaxSdkVersion: 0
+  m_AndroidUseCustomUsesConfiguration: 0
+  m_AndroidUsesConfiguration: []
+  m_AndroidUseCustomSupportsScreens: 0
+  m_AndroidSupportsScreens: []
+  m_AndroidUseCustomCompatibleScreens: 0
+  m_AndroidCompatibleScreens: []
+  m_AndroidUseCustomScreenOrientation: 0
+  m_AndroidScreenOrientation: 0
+  m_AndroidUseCustomConfigChanges: 0
+  m_AndroidConfigChanges: []
+  m_AndroidUseCustomLaunchMode: 0
+  m_AndroidLaunchMode: 0
+  m_AndroidUseCustomTheme: 0
+  m_AndroidTheme:
+  m_AndroidUseCustomWindowSoftInputMode: 0
+  m_AndroidWindowSoftInputMode: 0
+  m_AndroidUseCustomHardwareAccelerated: 0
+  m_AndroidHardwareAccelerated: 1
+  m_AndroidUseCustomLargeHeap: 0
+  m_AndroidLargeHeap: 0
+  m_AndroidUseCustomDebuggable: 0
+  m_AndroidDebuggable: 0
+  m_AndroidUseCustomTestOnly: 0
+  m_AndroidTestOnly: 0
+  m_AndroidUseCustomBackupAgent: 0
+  m_AndroidBackupAgent:
+  m_AndroidUseCustomAllowBackup: 0
+  m_AndroidAllowBackup: 1
+  m_AndroidUseCustomFullBackupContent: 0
+  m_AndroidFullBackupContent:
+  m_AndroidUseCustomNetworkSecurityConfig: 0
+  m_AndroidNetworkSecurityConfig:
+  m_AndroidUseCustomExtractNativeLibs: 0
+  m_AndroidExtractNativeLibs: 1
+  m_AndroidUseCustomIsGame: 0
+  m_AndroidIsGame: 1
+  m_AndroidUseCustomAppCategory: 0
+  m_AndroidAppCategory: 0
+  m_AndroidUseCustomDirectBootAware: 0
+  m_AndroidDirectBootAware: 0
+  m_AndroidUseCustomEncryptionRequired: 0
+  m_AndroidEncryptionRequired: 0
+  m_AndroidUseCustomRequiredAccountType: 0
+  m_AndroidRequiredAccountType:
+  m_AndroidUseCustomRestrictedAccountType: 0
+  m_AndroidRestrictedAccountType:
+  m_AndroidUseCustomSyncable: 0
+  m_AndroidSyncable: 0
+  m_AndroidUseCustomAccountType: 0
+  m_AndroidAccountType:
+  m_AndroidUseCustomPermission: 0
+  m_AndroidPermission: []
+  m_AndroidUseCustomPermissionGroup: 0
+  m_AndroidPermissionGroup: []
+  m_AndroidUseCustomPermissionTree: 0
+  m_AndroidPermissionTree: []
+  m_AndroidUseCustomUsesFeature: 0
+  m_AndroidUsesFeature: []
+  m_AndroidUseCustomUsesPermission: 0
+  m_AndroidUsesPermission: []
+  m_AndroidUseCustomUsesLibrary: 0
+  m_AndroidUsesLibrary: []
+  m_AndroidUseCustomUsesSdk: 0
+  m_AndroidMinSdkVersion: 29
+  m_AndroidTargetSdkVersion: 33
+  m_AndroidUseCustomTargetArchitectures: 0
+  m_AndroidTargetArchitectures: 4
+  m_AndroidUseCustomSupportedAbis: 0
+  m_AndroidSupportedAbis: []
+  m_AndroidUseCustomGraphicsApi: 0
+  m_AndroidGraphicsAPIs:
+  - 16
+  m_AndroidUseCustomVulkan: 0
+  m_AndroidVulkanEnabled: 0
+  m_AndroidUseCustomMultithreadedRendering: 0
+  m_AndroidMultithreadedRendering: 1
+  m_AndroidUseCustomGraphicsJobs: 0
+  m_AndroidGraphicsJobs: 1
+  m_AndroidUseCustomGraphicsJobsMode: 0
+  m_AndroidGraphicsJobsMode: 1
+  m_AndroidUseCustomIl2CppCompilerConfiguration: 0
+  m_AndroidIl2CppCompilerConfiguration: 0
+  m_AndroidUseCustomIl2CppCodeGeneration: 0
+  m_AndroidIl2CppCodeGeneration: 0
+  m_AndroidUseCustomIncrementalGC: 0
+  m_AndroidIncrementalGC: 1
+  m_AndroidUseCustomScriptingBackend: 0
+  m_AndroidScriptingBackend: 2
+  m_AndroidUseCustomApiCompatibilityLevel: 0
+  m_AndroidApiCompatibilityLevel: 6
+  m_AndroidUseCustomManagedStrippingLevel: 0
+  m_AndroidManagedStrippingLevel: 2
+  m_AndroidUseCustomStripEngineCode: 0
+  m_AndroidStripEngineCode: 1
+  m_AndroidUseCustomUseIncrementalGC: 0
+  m_AndroidUseIncrementalGC: 1
+  m_AndroidUseCustomUseCustomKeystore: 0
+  m_AndroidUseCustomKeystore: 0
+  m_AndroidUseCustomKeystorePath: 0
+  m_AndroidKeystorePath:
+  m_AndroidUseCustomKeystorePassword: 0
+  m_AndroidKeystorePassword:
+  m_AndroidUseCustomKeyAlias: 0
+  m_AndroidKeyAlias:
+  m_AndroidUseCustomKeyPassword: 0
+  m_AndroidKeyPassword:
+  m_AndroidUseCustomMinifyRelease: 0
+  m_AndroidMinifyRelease: 1
+  m_AndroidUseCustomProguardFile: 0
+  m_AndroidProguardFile: proguard.txt
+  m_AndroidUseCustomProguardUserFile: 0
+  m_AndroidProguardUserFile: proguard-user.txt
+  m_AndroidUseCustomEnableProguard: 0
+  m_AndroidEnableProguard: 0
+  m_AndroidUseCustomEnableR8: 0
+  m_AndroidEnableR8: 1
+  m_AndroidUseCustomUseCustomMainGradleTemplate: 0
+  m_AndroidUseCustomMainGradleTemplate: 0
+  m_AndroidUseCustomUseCustomGradlePropertiesTemplate: 0
+  m_AndroidUseCustomGradlePropertiesTemplate: 0
+  m_AndroidUseCustomUseCustomLauncherGradleTemplate: 0
+  m_AndroidUseCustomLauncherGradleTemplate: 0
+  m_AndroidUseCustomUseCustomMainTemplate: 0
+  m_AndroidUseCustomMainTemplate: 0
+  m_AndroidUseCustomUseCustomBaseGradleTemplate: 0
+  m_AndroidUseCustomBaseGradleTemplate: 0
+  m_AndroidUseCustomUseCustomApplicationGradleTemplate: 0
+  m_AndroidUseCustomApplicationGradleTemplate: 0
+  m_AndroidUseCustomUseCustomSettingsGradleTemplate: 0
+  m_AndroidUseCustomSettingsGradleTemplate: 0

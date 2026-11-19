@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+ProjectSettings:
+  m_ObjectHideFlags: 0
+  m_BuildTarget: 13
+  m_BuildTargetGroup: 1
+  m_TargetPlatforms:
+  - 13
+  m_ActiveBuildTarget: 13
+  m_EnabledVRDevices:
+  - Oculus
+  m_GraphicsAPIs:
+    Android:
+    - 16
+  m_ColorSpace: 1
+  m_StripUnusedMeshComponents: 1
+  m_VertexChannelCompressionMask: 63
+  m_MobileMTRendering: 1
+  m_GpuSkinning: 1
+  m_RealtimeReflectionProbes: 0
+  m_BakedReflectionProbes: 0
+  m_LightmapStripping: 1
+  m_InstancingStripping: 1
+  m_PWStripping: 1
+  m_ManagedStrippingLevel: 2
+  m_ManagedStrippingLevelSelected: 2
+  m_VirtualRealitySupported: 1
+  m_AccelerometerFrequency: 60
+  m_DeviceOrientation: 3
+  m_EnableFrameTimingStats: 0
+  m_EnableMemoryTimingStats: 0
+  m_EnableGPUTimingStats: 0
+  m_ShowActivityIndicatorOnLoading: 1
+  m_DefaultScreenOrientation: 3
+  m_TargetDevice: 2
+  m_TargetIOSGraphics: 1
+  m_TargetMetalAPI: 1
+  m_RenderingPath: 1
+  m_MobileRenderingPath: 1
+  m_StaticBatching: 1
+  m_DynamicBatching: 1
+  m_LightmapBaking: 1
+  m_DeferredDecals: 0
+  m_EnableHDR: 1
+  m_EnableMSAA: 1
+  m_UsePlayerLog: 1
+  m_BakeCollisionMeshes: 0
+  m_ForceSinglePassStereoRendering: 0
+  m_ForceMultipassStereoRendering: 0
+  m_StereoRenderingPath: 0
+  m_ActiveColorSpace: 1
+  m_UseHDRDisplay: 0
+  m_DefaultParticleSystemMaxParticleSize: 1000
+  m_DefaultParticleSystemMaxEmissionRate: 1000
+  m_DefaultParticleSystemLifetime: 1000
+  m_DefaultParticleSystemSpeed: 1000
+  m_DefaultParticleSystemGravity: 0, 0, 0
+  m_DefaultParticleSystemShape: 0
+  m_DefaultParticleSystemRotation: 0
+  m_DefaultParticleSystemSize: 1
+  m_DefaultParticleSystemColor: 1, 1, 1, 1
+  m_DefaultParticleSystemSubEmitter: 0
+  m_DefaultParticleSystemCollision: 0
+  m_DefaultParticleSystemTrigger: 0
+  m_DefaultParticleSystemNoise: 0
+  m_DefaultParticleSystemTextureSheetAnimation: 0
+  m_DefaultParticleSystemExternalForces: 0
+  m_DefaultParticleSystemLimitVelocityOverLifetime: 0
+  m_DefaultParticleSystemInheritVelocity: 0
+  m_DefaultParticleSystemForceOverLifetime: 0
+  m_DefaultParticleSystemColorOverLifetime: 0
+  m_DefaultParticleSystemSizeOverLifetime: 0
+  m_DefaultParticleSystemRotationOverLifetime: 0
+  m_DefaultParticleSystemExternalForcesMultiplier: 1
+  m_DefaultParticleSystemNoiseStrength: 1
+  m_DefaultParticleSystemNoiseFrequency: 1
+  m_DefaultParticleSystemNoiseScrollSpeed: 1
+  m_DefaultParticleSystemNoiseDamping: 1
+  m_DefaultParticleSystemNoiseOctaves: 1
+  m_DefaultParticleSystemNoiseQuality: 0
+  m_DefaultParticleSystemTextureSheetAnimationTilesX: 1
+  m_DefaultParticleSystemTextureSheetAnimationTilesY: 1
+  m_DefaultParticleSystemTextureSheetAnimationFrameOverTime: 0
+  m_DefaultParticleSystemTextureSheetAnimationStartFrame: 0
+  m_DefaultParticleSystemTextureSheetAnimationCycles: 1
+  m_DefaultParticleSystemTextureSheetAnimationRandomRow: 0

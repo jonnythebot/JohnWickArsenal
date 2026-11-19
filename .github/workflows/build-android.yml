@@ -1,0 +1,451 @@
+# John Wick Arsenal - GitHub Actions Build Pipeline
+# Builds Android AssetBundle for Blade & Sorcery Nomad mod
+# Supports manual dispatch, scheduled runs, and release tags
+
+name: Build Android Mod
+
+on:
+  workflow_dispatch:
+    inputs:
+      unity_version:
+        description: 'Unity version to use'
+        required: false
+        default: '2022.3.20f1'
+        type: choice
+        options:
+          - '2022.3.20f1'
+          - '2022.3.15f1'
+          - '2022.3.25f1'
+      configuration:
+        description: 'Build configuration'
+        required: false
+        default: 'Release'
+        type: choice
+        options:
+          - 'Release'
+          - 'Debug'
+      clean_build:
+        description: 'Clean build cache before building'
+        required: false
+        default: true
+        type: boolean
+
+  push:
+    branches: [main]
+    paths:
+      - 'Source/**'
+      - 'UnityProject/**'
+      - '.github/workflows/build-android.yml'
+      - 'build.sh'
+
+  pull_request:
+    branches: [main]
+
+  release:
+    types: [published]
+
+  schedule:
+    # Weekly build every Monday 02:00 UTC to catch Unity/dependency updates
+    - cron: '0 2 * * 1'
+
+env:
+  MOD_NAME: JohnWickArsenal
+  UNITY_VERSION: ${{ github.event.inputs.unity_version || '2022.3.20f1' }}
+  UNITY_PROJECT_PATH: ./UnityProject
+  SOURCE_DIR: ./Source/JohnWickArsenal
+  ASSEMBLY_OUTPUT: ./Assemblies
+  BUNDLE_OUTPUT: ./AssetBundles/Android
+  MOD_OUTPUT: ./BuildOutput
+  CONFIGURATION: ${{ github.event.inputs.configuration || 'Release' }}
+  CLEAN_BUILD: ${{ github.event.inputs.clean_build || 'true' }}
+
+jobs:
+  # ---------------------------------------------------------
+  # Setup: Cache key generation
+  # ---------------------------------------------------------
+  setup:
+    name: Setup & Cache Keys
+    runs-on: ubuntu-latest
+    outputs:
+      unity_cache_key: ${{ steps.cache_keys.outputs.unity }}
+      dotnet_cache_key: ${{ steps.cache_keys.outputs.dotnet }}
+      android_cache_key: ${{ steps.cache_keys.outputs.android }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Generate cache keys
+        id: cache_keys
+        run: |
+          echo "unity=unity-${{ env.UNITY_VERSION }}-${{ hashFiles('UnityProject/Packages/packages-lock.json') }}" >> $GITHUB_OUTPUT
+          echo "dotnet=dotnet-${{ hashFiles('Source/JohnWickArsenal/JohnWickArsenal.csproj') }}" >> $GITHUB_OUTPUT
+          echo "android=android-${{ hashFiles('.github/workflows/build-android.yml') }}" >> $GITHUB_OUTPUT
+
+  # ---------------------------------------------------------
+  # Install Unity, .NET SDK, Android SDK
+  # ---------------------------------------------------------
+  install_dependencies:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Restore Unity cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/unity
+          key: ${{ needs.setup.outputs.unity_cache_key }}
+          restore-keys: |
+            unity-${{ env.UNITY_VERSION }}-
+            unity-
+
+      - name: Install Unity
+        if: steps.restore_unity_cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Installing Unity ${{ env.UNITY_VERSION }}..."
+          UNITY_URL="https://download.unity3d.com/download_unity/${{ env.UNITY_VERSION }}/LinuxEditorInstaller/Unity.tar.xz"
+          wget -q "$UNITY_URL" -O /tmp/Unity.tar.xz
+          mkdir -p /opt/unity
+          tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
+          echo "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> $GITHUB_ENV
+          ls -la /opt/unity/Editor/Unity
+
+      - name: Verify Unity installation
+        run: |
+          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Editor/Unity}
+          $UNITY_EXECUTABLE -version
+
+      - name: Restore .NET cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ needs.setup.outputs.dotnet_cache_key }}
+          restore-keys: |
+            dotnet-
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Android SDK cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/android-sdk
+          key: ${{ needs.setup.outputs.android_cache_key }}
+          restore-keys: |
+            android-
+
+      - name: Install Android SDK
+        if: steps.restore_android_cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Installing Android SDK command line tools..."
+          mkdir -p /opt/android-sdk/cmdline-tools
+          wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O /tmp/cmdtools.zip
+          unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools/latest
+
+          # Accept licenses and install packages
+          yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.0" \
+            "ndk;25.1.8937393"
+
+          echo "ANDROID_HOME=/opt/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/opt/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_ENV
+
+      - name: Verify Android SDK
+        run: |
+          export ANDROID_HOME=${ANDROID_HOME:-/opt/android-sdk}
+          export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
+          adb version
+
+  # ---------------------------------------------------------
+  # Build Managed DLL
+  # ---------------------------------------------------------
+  build_dll:
+    name: Build Managed DLL
+    runs-on: ubuntu-latest
+    needs: [setup, install_dependencies]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore NuGet packages
+        run: |
+          cd ${{ env.SOURCE_DIR }}
+          dotnet restore JohnWickArsenal.csproj -v quiet
+
+      - name: Build DLL
+        run: |
+          cd ${{ env.SOURCE_DIR }}
+          dotnet build JohnWickArsenal.csproj \
+            -c ${{ env.CONFIGURATION }} \
+            -o ${{ env.ASSEMBLY_OUTPUT }} \
+            -v minimal \
+            --no-restore
+
+      - name: Verify DLL output
+        run: |
+          DLL_PATH="${{ env.ASSEMBLY_OUTPUT }}/JohnWickArsenal.dll"
+          if [ ! -f "$DLL_PATH" ]; then
+            echo "::error::DLL not found at $DLL_PATH"
+            exit 1
+          fi
+          SIZE=$(du -h "$DLL_PATH" | cut -f1)
+          echo "✅ DLL built: $DLL_PATH ($SIZE)"
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: managed-dll
+          path: ${{ env.ASSEMBLY_OUTPUT }}/JohnWickArsenal.dll
+          retention-days: 7
+
+  # ---------------------------------------------------------
+  # Build AssetBundle with Unity
+  # ---------------------------------------------------------
+  build_bundle:
+    name: Build AssetBundle (Unity)
+    runs-on: ubuntu-latest
+    needs: [setup, install_dependencies, build_dll]
+    timeout-minutes: 60
+    env:
+      UNITY_EXECUTABLE: /opt/unity/Editor/Unity
+      ANDROID_HOME: /opt/android-sdk
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      PATH: /opt/unity/Editor:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Restore Unity Library cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UNITY_PROJECT_PATH }}/Library
+          key: unity-library-${{ needs.setup.outputs.unity_cache_key }}-${{ github.sha }}
+          restore-keys: |
+            unity-library-${{ needs.setup.outputs.unity_cache_key }}-
+            unity-library-
+
+      - name: Download DLL artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: managed-dll
+          path: ${{ env.ASSEMBLY_OUTPUT }}
+
+      - name: Sync source code to Unity project
+        run: |
+          mkdir -p ${{ env.UNITY_PROJECT_PATH }}/Assets/Scripts/JohnWickArsenal
+          rsync -av --delete \
+            --exclude='*.csproj' \
+            --exclude='bin' \
+            --exclude='obj' \
+            --exclude='*.Tests*' \
+            ${{ env.SOURCE_DIR }}/ ${{ env.UNITY_PROJECT_PATH }}/Assets/Scripts/JohnWickArsenal/
+
+      - name: Create URP Asset if missing
+        run: |
+          # This will be handled by the Unity bootstrap script
+          echo "URP asset creation handled in Unity"
+
+      - name: Run Unity batch build
+        run: |
+          cd ${{ env.UNITY_PROJECT_PATH }}
+          $UNITY_EXECUTABLE \
+            -batchmode \
+            -quit \
+            -projectPath ${{ env.UNITY_PROJECT_PATH }} \
+            -executeMethod JWA_BuildAssetBundles.BuildBundle \
+            -logFile - \
+            -buildTarget Android \
+            -outputPath ${{ env.BUNDLE_OUTPUT }} \
+            -bundleName johnwickarsenal \
+            2>&1 | tee unity_build.log
+
+          # Check exit code
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Unity build failed with exit code $EXIT_CODE"
+            cat unity_build.log
+            exit $EXIT_CODE
+          fi
+
+      - name: Verify AssetBundle output
+        run: |
+          BUNDLE_PATH="${{ env.BUNDLE_OUTPUT }}/johnwickarsenal"
+          if [ ! -f "$BUNDLE_PATH" ]; then
+            echo "::error::AssetBundle not found at $BUNDLE_PATH"
+            ls -la ${{ env.BUNDLE_OUTPUT }}/ 2>/dev/null || echo "Output directory doesn't exist"
+            exit 1
+          fi
+
+          SIZE=$(du -h "$BUNDLE_PATH" | cut -f1)
+          MAGIC=$(head -c 7 "$BUNDLE_PATH")
+          if [ "$MAGIC" != "UnityFS" ]; then
+            echo "::warning::AssetBundle doesn't have UnityFS header (may be legacy format)"
+          fi
+          echo "✅ AssetBundle built: $BUNDLE_PATH ($SIZE)"
+
+      - name: Upload AssetBundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: assetbundle-android
+          path: ${{ env.BUNDLE_OUTPUT }}/johnwickarsenal
+          retention-days: 7
+
+      - name: Upload Unity build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-build-log
+          path: ${{ env.UNITY_PROJECT_PATH }}/unity_build.log
+          retention-days: 7
+
+  # ---------------------------------------------------------
+  # Package Mod
+  # ---------------------------------------------------------
+  package:
+    name: Package Mod
+    runs-on: ubuntu-latest
+    needs: [build_dll, build_bundle]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download DLL artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: managed-dll
+          path: ${{ env.ASSEMBLY_OUTPUT }}
+
+      - name: Download AssetBundle artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: assetbundle-android
+          path: ${{ env.BUNDLE_OUTPUT }}
+
+      - name: Package mod
+        run: |
+          rm -rf ${{ env.MOD_OUTPUT }}
+          mkdir -p ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}
+
+          cp mod.json ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/
+          cp icon.png ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/
+          cp README.md ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/
+          cp ${{ env.ASSEMBLY_OUTPUT }}/JohnWickArsenal.dll ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/
+          cp ${{ env.BUNDLE_OUTPUT }}/johnwickarsenal ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/johnwickarsenal.bundle
+
+          cd ${{ env.MOD_OUTPUT }}
+          zip -r ${{ env.MOD_NAME }}_v1.0.0.zip ${{ env.MOD_NAME }}/
+
+          echo "✅ Mod packaged: ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}_v1.0.0.zip"
+
+      - name: Verify package
+        run: |
+          cd ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}
+          REQUIRED=(mod.json icon.png JohnWickArsenal.dll johnwickarsenal.bundle README.md)
+          for file in "${REQUIRED[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "::error::Missing required file: $file"
+              exit 1
+            fi
+            SIZE=$(du -h "$file" | cut -f1)
+            echo "  ✓ $file ($SIZE)"
+          done
+
+          # Validate mod.json
+          python3 -c "
+          import json, sys
+          with open('mod.json') as f:
+              data = json.load(f)
+          assert data.get('id') == 'johnwickarsenal', f'Mod ID mismatch: {data.get(\"id\")}'
+          assert data.get('version') == '1.0.0', f'Version mismatch: {data.get(\"version\")}'
+          print('✅ mod.json valid')
+          "
+          echo "✅ All verification checks passed"
+
+      - name: Upload mod package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-package
+          path: |
+            ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}/
+            ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}_v1.0.0.zip
+          retention-days: 30
+
+  # ---------------------------------------------------------
+  # Release: Publish to GitHub Releases
+  # ---------------------------------------------------------
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [package]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      contents: write
+    steps:
+      - name: Download mod package
+        uses: actions/download-artifact@v4
+        with:
+          name: mod-package
+          path: ${{ env.MOD_OUTPUT }}
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.MOD_OUTPUT }}/${{ env.MOD_NAME }}_v1.0.0.zip
+          tag_name: ${{ github.event.release.tag_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------------------
+  # Summary
+  # ---------------------------------------------------------
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [build_dll, build_bundle, package]
+    if: always()
+    steps:
+      - name: Print build status
+        run: |
+          echo "=== JOHN WICK ARSENAL BUILD SUMMARY ==="
+          echo "DLL Build: ${{ needs.build_dll.result }}"
+          echo "AssetBundle Build: ${{ needs.build_bundle.result }}"
+          echo "Package: ${{ needs.package.result }}"
+
+          if [[ "${{ needs.build_dll.result }}" == "success" && \
+                "${{ needs.build_bundle.result }}" == "success" && \
+                "${{ needs.package.result }}" == "success" ]]; then
+            echo "✅ ALL BUILDS SUCCESSFUL"
+          else
+            echo "❌ SOME BUILDS FAILED"
+            exit 1
+          fi

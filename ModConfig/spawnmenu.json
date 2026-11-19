@@ -1,0 +1,51 @@
+{
+  "category": "John Wick Arsenal",
+  "icon": "jwa_category_icon",
+  "subcategories": [
+    {
+      "name": "Pistols",
+      "icon": "jwa_pistol_icon",
+      "items": [
+        { "id": "jwa_hk_p30l", "sortOrder": 1 },
+        { "id": "jwa_glock_34", "sortOrder": 2 },
+        { "id": "jwa_sti_2011_combat_master", "sortOrder": 3 },
+        { "id": "jwa_tti_pit_viper", "sortOrder": 4 }
+      ]
+    },
+    {
+      "name": "Shotguns",
+      "icon": "jwa_shotgun_icon",
+      "items": [
+        { "id": "jwa_benelli_m4", "sortOrder": 1 },
+        { "id": "jwa_keltec_ksg", "sortOrder": 2 }
+      ]
+    },
+    {
+      "name": "Revolvers",
+      "icon": "jwa_revolver_icon",
+      "items": [
+        { "id": "jwa_remington_1875", "sortOrder": 1 }
+      ]
+    },
+    {
+      "name": "Rifles",
+      "icon": "jwa_rifle_icon",
+      "items": [
+        { "id": "jwa_tti_tr1_ultralight", "sortOrder": 1 }
+      ]
+    },
+    {
+      "name": "Throwables",
+      "icon": "jwa_throwable_icon",
+      "items": [
+        { "id": "jwa_throwing_knife", "sortOrder": 1 },
+        { "id": "jwa_pencil", "sortOrder": 2 }
+      ]
+    }
+  ],
+  "featuredItems": [
+    "jwa_tti_pit_viper",
+    "jwa_pencil",
+    "jwa_benelli_m4"
+  ]
+}

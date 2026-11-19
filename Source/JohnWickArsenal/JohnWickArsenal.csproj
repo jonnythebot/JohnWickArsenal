@@ -1,0 +1,128 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>JohnWickArsenal</AssemblyName>
+    <RootNamespace>JohnWickArsenal</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>true</Deterministic>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Unity/Blade & Sorcery References -->
+  <!-- These paths must be adjusted to your B&S installation -->
+  <ItemGroup>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(UNITY_PATH)/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Blade & Sorcery Assemblies -->
+  <!-- Copy these from your B&S Nomad installation: /sdcard/Mods/ or PC version Managed folder -->
+  <ItemGroup Condition="Exists('$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll')">
+    <Reference Include="BladeAndSorcery.Data">
+      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Gameplay">
+      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Gameplay.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Controls">
+      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Controls.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Nomad">
+      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Nomad.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Fallback: Reference from Unity project Library folder after opening in Unity once -->
+  <ItemGroup Condition="!Exists('$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll') And Exists('$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Data.dll')">
+    <Reference Include="BladeAndSorcery.Data">
+      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Data.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Gameplay">
+      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Gameplay.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Controls">
+      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Controls.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BladeAndSorcery.Nomad">
+      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Nomad.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Source Files -->
+  <ItemGroup>
+    <Compile Include="JohnWickArsenal.cs" />
+    <Compile Include="Behaviors\JohnWickPistolBehavior.cs" />
+    <Compile Include="Behaviors\JohnWickShotgunBehavior.cs" />
+    <Compile Include="Behaviors\JohnWickRevolverBehavior.cs" />
+    <Compile Include="Behaviors\JohnWickRifleBehavior.cs" />
+    <Compile Include="Behaviors\ThrowingKnifeBehavior.cs" />
+    <Compile Include="Behaviors\PencilBehavior.cs" />
+    <Compile Include="Utils\ModBehaviorRegistry.cs" />
+    <Compile Include="Data\ConfigLoader.cs" />
+  </ItemGroup>
+
+  <!-- Embed mod.json as resource for version reading -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\mod.json" LogicalName="mod.json" />
+    <EmbeddedResource Include="..\..\ModConfig\weapons.json" LogicalName="weapons.json" />
+    <EmbeddedResource Include="..\..\ModConfig\spawnmenu.json" LogicalName="spawnmenu.json" />
+  </ItemGroup>
+
+  <!-- Output to mod folder -->
+  <PropertyGroup>
+    <ModOutputPath>$(MSBuildProjectDirectory)\..\..\Assemblies\</ModOutputPath>
+  </PropertyGroup>
+
+  <Target Name="CopyToModFolder" AfterTargets="Build">
+    <MakeDir Directories="$(ModOutputPath)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModOutputPath)" SkipUnchangedFiles="true" />
+    <Message Text="Copied $(TargetFileName) to $(ModOutputPath)" Importance="high" />
+  </Target>
+
+</Project>

@@ -1,0 +1,530 @@
+{
+  "weapons": [
+    {
+      "id": "jwa_hk_p30l",
+      "name": "H&K P30L",
+      "category": "Pistol",
+      "film": "John Wick (Chapter 1)",
+      "scene": "Red Circle Club / Home Invasion",
+      "caliber": "9x19mm",
+      "capacity": 15,
+      "barrelLength": "4.45 in",
+      "weight": "812 g (empty)",
+      "features": [
+        "Threaded barrel with compensator",
+        "TruGlo TFX Pro night sights",
+        "Tactical rail for light/laser",
+        "Custom stippled grip",
+        "Extended magazine release"
+      ],
+      "unityPrefab": "Weapons/Pistols/HK_P30L",
+      "behavior": "JohnWickPistolBehavior",
+      "behaviorConfig": {
+        "hasCompensator": true,
+        "compensatorRecoilReduction": 0.3,
+        "hasRedDot": false,
+        "isRaceGun": false,
+        "matchTriggerPull": 5.5
+      },
+      "animations": {
+        "draw": "P30L_Draw",
+        "idle": "P30L_Idle",
+        "fire": "P30L_Fire",
+        "reload_tactical": "P30L_Reload_Tactical",
+        "reload_empty": "P30L_Reload_Empty",
+        "inspect": "P30L_Inspect",
+        "holster": "P30L_Holster"
+      },
+      "audio": {
+        "fire": "P30L_Fire",
+        "fire_suppressed": "P30L_Fire_Suppressed",
+        "reload_mag_out": "P30L_MagOut",
+        "reload_mag_in": "P30L_MagIn",
+        "slide_release": "P30L_SlideRelease",
+        "slide_rack": "P30L_SlideRack",
+        "dry_fire": "P30L_DryFire"
+      },
+      "particles": {
+        "muzzle_flash": "Pistol_MuzzleFlash_9mm",
+        "compensator_gas": "P30L_CompensatorGas",
+        "ejection": "Pistol_Casing_9mm"
+      }
+    },
+    {
+      "id": "jwa_glock_34",
+      "name": "Glock 34 Gen 5 MOS",
+      "category": "Pistol",
+      "film": "John Wick: Chapter 2",
+      "scene": "Catacombs / Continental",
+      "caliber": "9x19mm",
+      "capacity": 17,
+      "barrelLength": "5.31 in",
+      "weight": "780 g (empty)",
+      "features": [
+        "MOS cut for red dot",
+        "Extended slide release",
+        "Minus connector (3.5 lb trigger)",
+        "Extended magazine release",
+        "Flared magwell",
+        "Front slide serrations"
+      ],
+      "unityPrefab": "Weapons/Pistols/Glock_34",
+      "behavior": "JohnWickPistolBehavior",
+      "behaviorConfig": {
+        "hasCompensator": false,
+        "hasRedDot": true,
+        "isRaceGun": false,
+        "matchTriggerPull": 3.5
+      },
+      "animations": {
+        "draw": "Glock34_Draw",
+        "idle": "Glock34_Idle",
+        "fire": "Glock34_Fire",
+        "reload_tactical": "Glock34_Reload_Tactical",
+        "reload_empty": "Glock34_Reload_Empty",
+        "inspect": "Glock34_Inspect",
+        "holster": "Glock34_Holster"
+      },
+      "audio": {
+        "fire": "Glock34_Fire",
+        "fire_suppressed": "Glock34_Fire_Suppressed",
+        "reload_mag_out": "Glock34_MagOut",
+        "reload_mag_in": "Glock34_MagIn",
+        "slide_release": "Glock34_SlideRelease",
+        "slide_rack": "Glock34_SlideRack",
+        "dry_fire": "Glock34_DryFire"
+      },
+      "particles": {
+        "muzzle_flash": "Pistol_MuzzleFlash_9mm",
+        "ejection": "Pistol_Casing_9mm"
+      }
+    },
+    {
+      "id": "jwa_sti_2011_combat_master",
+      "name": "STI 2011 Combat Master",
+      "category": "Pistol",
+      "film": "John Wick: Chapter 3 / Chapter 4",
+      "scene": "Taran Tactical / Osaka Continental",
+      "caliber": ".40 S&W",
+      "capacity": 20,
+      "barrelLength": "5.0 in",
+      "weight": "1,150 g (empty)",
+      "features": [
+        "Integrated compensator",
+        "Red dot ready (RMR cut)",
+        "Match-grade bull barrel",
+        "Extended magwell",
+        "Adjustable trigger (2.5 lb)",
+        "Gold accents",
+        "Dawson Precision sights"
+      ],
+      "unityPrefab": "Weapons/Pistols/STI_2011_CombatMaster",
+      "behavior": "JohnWickPistolBehavior",
+      "behaviorConfig": {
+        "hasCompensator": true,
+        "compensatorRecoilReduction": 0.4,
+        "hasRedDot": true,
+        "isRaceGun": true,
+        "matchTriggerPull": 2.5
+      },
+      "animations": {
+        "draw": "STI2011_Draw",
+        "idle": "STI2011_Idle",
+        "fire": "STI2011_Fire",
+        "reload_tactical": "STI2011_Reload_Tactical",
+        "reload_empty": "STI2011_Reload_Empty",
+        "inspect": "STI2011_Inspect",
+        "holster": "STI2011_Holster"
+      },
+      "audio": {
+        "fire": "STI2011_Fire_40SW",
+        "fire_suppressed": "STI2011_Fire_40SW_Suppressed",
+        "reload_mag_out": "STI2011_MagOut",
+        "reload_mag_in": "STI2011_MagIn",
+        "slide_release": "STI2011_SlideRelease",
+        "slide_rack": "STI2011_SlideRack",
+        "dry_fire": "STI2011_DryFire"
+      },
+      "particles": {
+        "muzzle_flash": "Pistol_MuzzleFlash_40SW",
+        "compensator_gas": "STI2011_CompensatorGas",
+        "ejection": "Pistol_Casing_40SW"
+      }
+    },
+    {
+      "id": "jwa_tti_pit_viper",
+      "name": "TTI Pit Viper",
+      "category": "Pistol",
+      "film": "John Wick: Chapter 4",
+      "scene": "Paris / Osaka / New York",
+      "caliber": "9mm Major",
+      "capacity": 21,
+      "barrelLength": "5.0 in",
+      "weight": "1,100 g (empty)",
+      "features": [
+        "TTI custom compensator",
+        "Trijicon RMRcc mounted",
+        "Gold TiN coated barrel/parts",
+        "Custom stippled grip",
+        "Match trigger (~2 lb)",
+        "9mm Major power factor",
+        "Extended basepads",
+        "Custom cerakote finish"
+      ],
+      "unityPrefab": "Weapons/Pistols/TTI_PitViper",
+      "behavior": "JohnWickPistolBehavior",
+      "behaviorConfig": {
+        "hasCompensator": true,
+        "compensatorRecoilReduction": 0.45,
+        "hasRedDot": true,
+        "isRaceGun": true,
+        "matchTriggerPull": 2.0
+      },
+      "animations": {
+        "draw": "PitViper_Draw",
+        "idle": "PitViper_Idle",
+        "fire": "PitViper_Fire",
+        "reload_tactical": "PitViper_Reload_Tactical",
+        "reload_empty": "PitViper_Reload_Empty",
+        "inspect": "PitViper_Inspect",
+        "holster": "PitViper_Holster"
+      },
+      "audio": {
+        "fire": "PitViper_Fire_9mmMajor",
+        "fire_suppressed": "PitViper_Fire_Suppressed",
+        "reload_mag_out": "PitViper_MagOut",
+        "reload_mag_in": "PitViper_MagIn",
+        "slide_release": "PitViper_SlideRelease",
+        "slide_rack": "PitViper_SlideRack",
+        "dry_fire": "PitViper_DryFire"
+      },
+      "particles": {
+        "muzzle_flash": "Pistol_MuzzleFlash_9mmMajor",
+        "compensator_gas": "PitViper_CompensatorGas_Gold",
+        "ejection": "Pistol_Casing_9mm_Gold"
+      }
+    },
+    {
+      "id": "jwa_benelli_m4",
+      "name": "Benelli M4 Super 90",
+      "category": "Shotgun",
+      "film": "John Wick (Chapter 1)",
+      "scene": "Red Circle Club",
+      "caliber": "12 Gauge",
+      "capacity": "7+1",
+      "barrelLength": "18.5 in",
+      "weight": "3,780 g",
+      "features": [
+        "ARGO auto-regulating gas system",
+        "Ghost ring sights",
+        "Collapsible stock",
+        "Pistol grip option",
+        "Shell carrier (6 rounds)",
+        "Chrome-lined barrel"
+      ],
+      "unityPrefab": "Weapons/Shotguns/Benelli_M4",
+      "behavior": "JohnWickShotgunBehavior",
+      "behaviorConfig": {
+        "hasDualTube": false,
+        "hasShellCarrier": true,
+        "shellCarrierCapacity": 6,
+        "hasARGO": true,
+        "hasGhostRingSights": true,
+        "hasCollapsibleStock": true
+      },
+      "animations": {
+        "draw": "BenelliM4_Draw",
+        "idle": "BenelliM4_Idle",
+        "fire": "BenelliM4_Fire",
+        "reload_start": "BenelliM4_Reload_Start",
+        "reload_shell": "BenelliM4_Reload_Shell",
+        "reload_end": "BenelliM4_Reload_End",
+        "pump": "BenelliM4_Pump",
+        "inspect": "BenelliM4_Inspect"
+      },
+      "audio": {
+        "fire": "BenelliM4_Fire_12GA",
+        "fire_suppressed": "BenelliM4_Fire_Suppressed",
+        "pump": "BenelliM4_Pump",
+        "shell_load": "BenelliM4_ShellLoad",
+        "shell_eject": "BenelliM4_ShellEject"
+      },
+      "particles": {
+        "muzzle_flash": "Shotgun_MuzzleFlash_12GA",
+        "gas_port": "BenelliM4_GasPort",
+        "shell_eject": "Shotgun_Shell_12GA"
+      }
+    },
+    {
+      "id": "jwa_keltec_ksg",
+      "name": "Kel-Tec KSG",
+      "category": "Shotgun",
+      "film": "John Wick: Chapter 3",
+      "scene": "Taran Tactical Training",
+      "caliber": "12 Gauge",
+      "capacity": "7+7+1 (Dual Tube)",
+      "barrelLength": "18.5 in",
+      "weight": "3,100 g",
+      "features": [
+        "Dual magazine tubes",
+        "Tube selector switch",
+        "Bullpup configuration",
+        "Picatinny rail top/bottom",
+        "Forward grip",
+        "Flip-up sights",
+        "Ejection port forward"
+      ],
+      "unityPrefab": "Weapons/Shotguns/KelTec_KSG",
+      "behavior": "JohnWickShotgunBehavior",
+      "behaviorConfig": {
+        "hasDualTube": true,
+        "hasShellCarrier": false,
+        "hasARGO": false,
+        "hasGhostRingSights": false,
+        "hasCollapsibleStock": false
+      },
+      "animations": {
+        "draw": "KSG_Draw",
+        "idle": "KSG_Idle",
+        "fire": "KSG_Fire",
+        "reload_start": "KSG_Reload_Start",
+        "reload_shell": "KSG_Reload_Shell",
+        "reload_end": "KSG_Reload_End",
+        "tube_switch": "KSG_TubeSwitch",
+        "pump": "KSG_Pump",
+        "inspect": "KSG_Inspect"
+      },
+      "audio": {
+        "fire": "KSG_Fire_12GA",
+        "pump": "KSG_Pump",
+        "shell_load_a": "KSG_ShellLoad_A",
+        "shell_load_b": "KSG_ShellLoad_B",
+        "tube_switch": "KSG_TubeSwitch"
+      },
+      "particles": {
+        "muzzle_flash": "Shotgun_MuzzleFlash_12GA",
+        "shell_eject": "Shotgun_Shell_12GA_Forward"
+      }
+    },
+    {
+      "id": "jwa_remington_1875",
+      "name": "Remington 1875",
+      "category": "Revolver",
+      "film": "John Wick: Chapter 2",
+      "scene": "Continental Armory",
+      "caliber": ".45 Colt",
+      "capacity": 6,
+      "barrelLength": "7.5 in",
+      "weight": "1,100 g",
+      "features": [
+        "Single action only",
+        "Loading gate",
+        "Ejector rod",
+        "Case-hardened frame",
+        "Blued barrel/cylinder",
+        "Walnut grips",
+        "Antique patina finish"
+      ],
+      "unityPrefab": "Weapons/Revolvers/Remington_1875",
+      "behavior": "JohnWickRevolverBehavior",
+      "behaviorConfig": {
+        "isSingleAction": true,
+        "hasLoadingGate": true,
+        "hasEjectorRod": true,
+        "loadingGateOpenAngle": 90,
+        "loadingGateSpeed": 180,
+        "ejectorRodTravel": 0.05,
+        "ejectorSpeed": 2
+      },
+      "animations": {
+        "draw": "Rem1875_Draw",
+        "idle": "Rem1875_Idle",
+        "fire": "Rem1875_Fire",
+        "cock_hammer": "Rem1875_CockHammer",
+        "reload_start": "Rem1875_Reload_Start",
+        "reload_open_gate": "Rem1875_OpenGate",
+        "reload_eject": "Rem1875_Eject",
+        "reload_load": "Rem1875_LoadRound",
+        "reload_close_gate": "Rem1875_CloseGate",
+        "inspect": "Rem1875_Inspect"
+      },
+      "audio": {
+        "fire": "Rem1875_Fire_45Colt",
+        "hammer_cock": "Rem1875_HammerCock",
+        "hammer_fall": "Rem1875_HammerFall",
+        "gate_open": "Rem1875_GateOpen",
+        "gate_close": "Rem1875_GateClose",
+        "ejector_rod": "Rem1875_EjectorRod",
+        "casing_eject": "Rem1875_CasingEject",
+        "round_load": "Rem1875_RoundLoad"
+      },
+      "particles": {
+        "muzzle_flash": "Revolver_MuzzleFlash_45Colt",
+        "smoke": "Rem1875_BlackPowderSmoke",
+        "casing_eject": "Revolver_Casing_45Colt"
+      }
+    },
+    {
+      "id": "jwa_tti_tr1_ultralight",
+      "name": "TTI TR-1 Ultralight",
+      "category": "Rifle",
+      "film": "John Wick: Chapter 4",
+      "scene": "Paris Apartment / Sacré-Cœur",
+      "caliber": "5.56x45mm",
+      "capacity": 30,
+      "barrelLength": "14.5 in (pinned/welded)",
+      "weight": "2,300 g (empty, no optic)",
+      "features": [
+        "Skeletonized upper/lower",
+        "Carbon fiber handguard",
+        "Trijicon MRO red dot",
+        "TTI compensator",
+        "Lightweight BCG",
+        "Adjustable gas block",
+        "Geissele SSA-E trigger",
+        "Magpul SL-K stock"
+      ],
+      "unityPrefab": "Weapons/Rifles/TTI_TR1_Ultralight",
+      "behavior": "JohnWickRifleBehavior",
+      "behaviorConfig": {
+        "hasSkeletonizedReceiver": true,
+        "hasCarbonFiberHandguard": true,
+        "hasAdjustableGasBlock": true,
+        "hasLightweightBCG": true,
+        "hasBinaryTrigger": false,
+        "hasRedDot": true,
+        "weightReduction": 0.35
+      },
+      "animations": {
+        "draw": "TR1_Draw",
+        "idle": "TR1_Idle",
+        "fire": "TR1_Fire",
+        "fire_auto": "TR1_Fire_Auto",
+        "reload_tactical": "TR1_Reload_Tactical",
+        "reload_empty": "TR1_Reload_Empty",
+        "charging_handle": "TR1_ChargingHandle",
+        "gas_adjust": "TR1_GasAdjust",
+        "inspect": "TR1_Inspect"
+      },
+      "audio": {
+        "fire": "TR1_Fire_556",
+        "fire_suppressed": "TR1_Fire_556_Suppressed",
+        "reload_mag_out": "TR1_MagOut",
+        "reload_mag_in": "TR1_MagIn",
+        "bolt_release": "TR1_BoltRelease",
+        "charging_handle": "TR1_ChargingHandle",
+        "gas_adjust": "TR1_GasAdjust",
+        "dry_fire": "TR1_DryFire"
+      },
+      "particles": {
+        "muzzle_flash": "Rifle_MuzzleFlash_556",
+        "compensator_gas": "TR1_CompensatorGas",
+        "gas_port": "TR1_GasPort",
+        "ejection": "Rifle_Casing_556"
+      }
+    }
+  ],
+  "throwables": [
+    {
+      "id": "jwa_throwing_knife",
+      "name": "Throwing Knife",
+      "category": "Throwable",
+      "film": "John Wick (Chapter 1) / Chapter 3",
+      "scene": "Red Circle / Knife Room",
+      "type": "Knife",
+      "damage": 65,
+      "throwForce": 18,
+      "spinRate": 720,
+      "stickProbability": 0.95,
+      "maxStack": 5,
+      "retrievable": true,
+      "features": [
+        "Perfectly balanced",
+        "Double-edged blade",
+        "Paracord wrapped handle",
+        "Silent kill capability",
+        "Headshot multiplier: 3x"
+      ],
+      "unityPrefab": "Weapons/Throwables/ThrowingKnife",
+      "behavior": "ThrowingKnifeBehavior",
+      "behaviorConfig": {
+        "isBalanced": true,
+        "isDoubleEdged": true,
+        "headshotMultiplier": 3.0,
+        "neckMultiplier": 2.5,
+        "stickProbability": 0.95,
+        "throwForce": 18,
+        "spinRate": 720
+      },
+      "animations": {
+        "draw": "ThrowKnife_Draw",
+        "idle": "ThrowKnife_Idle",
+        "throw": "ThrowKnife_Throw",
+        "retrieve": "ThrowKnife_Retrieve",
+        "inspect": "ThrowKnife_Inspect"
+      },
+      "audio": {
+        "throw": "ThrowKnife_Throw",
+        "impact_flesh": "ThrowKnife_ImpactFlesh",
+        "impact_hard": "ThrowKnife_ImpactHard",
+        "retrieve": "ThrowKnife_Retrieve"
+      },
+      "particles": {
+        "blood": "ThrowKnife_Blood",
+        "trail": "ThrowKnife_Trail"
+      }
+    },
+    {
+      "id": "jwa_pencil",
+      "name": "Pencil",
+      "category": "Throwable",
+      "film": "John Wick: Chapter 2 / Chapter 3",
+      "scene": "Pencil Kill / Knife Room",
+      "type": "Improvised",
+      "damage": 999,
+      "throwForce": 25,
+      "spinRate": 1080,
+      "stickProbability": 0.85,
+      "maxStack": 3,
+      "retrievable": true,
+      "features": [
+        "\"In the right hands, deadlier than a gun.\"",
+        "Instant kill on head/neck hit",
+        "Penetrates 15cm into target",
+        "Breaks after 3 kills",
+        "HB Graphite #2",
+        "John Wick quote on spawn"
+      ],
+      "unityPrefab": "Weapons/Throwables/Pencil",
+      "behavior": "PencilBehavior",
+      "behaviorConfig": {
+        "instantKillHeadshot": true,
+        "instantKillNeck": true,
+        "penetrationDepth": 0.15,
+        "maxKillsBeforeBreak": 3,
+        "throwForce": 25,
+        "spinRate": 1080,
+        "stickProbability": 0.85
+      },
+      "animations": {
+        "draw": "Pencil_Draw",
+        "idle": "Pencil_Idle",
+        "throw": "Pencil_Throw",
+        "retrieve": "Pencil_Retrieve",
+        "break": "Pencil_Break",
+        "inspect": "Pencil_Inspect"
+      },
+      "audio": {
+        "throw": "Pencil_Throw",
+        "impact_flesh": "Pencil_ImpactFlesh",
+        "impact_hard": "Pencil_ImpactHard",
+        "break": "Pencil_Break",
+        "quote": "Pencil_Quote_ImBack"
+      },
+      "particles": {
+        "graphite_dust": "Pencil_GraphiteDust",
+        "break_pieces": "Pencil_BreakPieces"
+      }
+    }
+  ]
+}

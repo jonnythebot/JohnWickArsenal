@@ -1,0 +1,175 @@
+# John Wick Arsenal - GitLab CI Build Pipeline
+# Alternative to GitHub Actions for GitLab users
+
+stages:
+  - setup
+  - build_dll
+  - build_bundle
+  - package
+  - verify
+  - deploy
+
+variables:
+  MOD_NAME: "JohnWickArsenal"
+  UNITY_VERSION: "2022.3.20f1"
+  UNITY_PROJECT_PATH: "./UnityProject"
+  BUNDLE_OUTPUT: "./AssetBundles/Android"
+  MOD_OUTPUT: "./BuildOutput"
+  CONFIGURATION: "Release"
+
+  # Cache paths
+  UNITY_CACHE_KEY: "unity-${UNITY_VERSION}-${CI_COMMIT_REF_SLUG}"
+  DOTNET_CACHE_KEY: "dotnet-${CI_COMMIT_REF_SLUG}"
+
+# ---------------------------------------------------------
+# Setup: Install Unity, .NET, Android SDK
+# ---------------------------------------------------------
+setup:
+  stage: setup
+  image: ubuntu:22.04
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq wget curl unzip zip python3 git openjdk-11-jdk-headless
+  script:
+    # Install Unity
+    - |
+      UNITY_URL="https://download.unity3d.com/download_unity/${UNITY_VERSION}/LinuxEditorInstaller/Unity.tar.xz"
+      wget -q "$UNITY_URL" -O /tmp/Unity.tar.xz
+      mkdir -p /opt/unity
+      tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
+      echo "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> build.env
+    # Install .NET SDK
+    - |
+      wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+      dpkg -i packages-microsoft-prod.deb
+      apt-get update -qq
+      apt-get install -y -qq dotnet-sdk-8.0
+    # Install Android SDK (command line tools)
+    - |
+      mkdir -p /opt/android-sdk/cmdline-tools
+      wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O /tmp/cmdtools.zip
+      unzip -q /tmp/cmdtools.zip -d /opt/android-sdk/cmdline-tools/latest
+      yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+      /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0" "ndk;25.1.8937393"
+      echo "ANDROID_HOME=/opt/android-sdk" >> build.env
+      echo "PATH=$PATH:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+    paths:
+      - /opt/unity
+      - /opt/android-sdk
+    expire_in: 1 week
+
+# ---------------------------------------------------------
+# Build Managed DLL
+# ---------------------------------------------------------
+build_dll:
+  stage: build_dll
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  needs: [setup]
+  script:
+    - cd Source/${MOD_NAME}
+    - dotnet restore JohnWickArsenal.csproj
+    - dotnet build JohnWickArsenal.csproj -c ${CONFIGURATION} -o ../../Assemblies --no-restore
+  artifacts:
+    paths:
+      - Assemblies/JohnWickArsenal.dll
+    expire_in: 1 week
+
+# ---------------------------------------------------------
+# Build AssetBundle with Unity
+# ---------------------------------------------------------
+build_bundle:
+  stage: build_bundle
+  image: ubuntu:22.04
+  needs: [setup, build_dll]
+  before_script:
+    - source build.env
+    - export PATH=$PATH:/opt/android-sdk/platform-tools:/opt/android-sdk/cmdline-tools/latest/bin
+  script:
+    # Sync source to Unity project
+    - rsync -av --delete --exclude='*.csproj' --exclude='bin' --exclude='obj' --exclude='*.Tests*' Source/${MOD_NAME}/ ${UNITY_PROJECT_PATH}/Assets/Scripts/JohnWickArsenal/
+    # Run Unity batch build
+    - ${UNITY_EXECUTABLE} -batchmode -quit -projectPath ${UNITY_PROJECT_PATH} -executeMethod JohnWickArsenal.Editor.JWA_BuildAssetBundles.BuildBundle -logFile - -buildTarget Android
+  artifacts:
+    paths:
+      - AssetBundles/Android/johnwickarsenal
+    expire_in: 1 week
+
+# ---------------------------------------------------------
+# Package Mod
+# ---------------------------------------------------------
+package:
+  stage: package
+  image: ubuntu:22.04
+  needs: [build_dll, build_bundle]
+  script:
+    - mkdir -p ${MOD_OUTPUT}/${MOD_NAME}
+    - cp mod.json ${MOD_OUTPUT}/${MOD_NAME}/
+    - cp icon.png ${MOD_OUTPUT}/${MOD_NAME}/
+    - cp README.md ${MOD_OUTPUT}/${MOD_NAME}/
+    - cp Assemblies/JohnWickArsenal.dll ${MOD_OUTPUT}/${MOD_NAME}/
+    - cp AssetBundles/Android/johnwickarsenal ${MOD_OUTPUT}/${MOD_NAME}/johnwickarsenal.bundle
+    - cd ${MOD_OUTPUT}
+    - zip -r ${MOD_NAME}_v1.0.0.zip ${MOD_NAME}/
+  artifacts:
+    paths:
+      - BuildOutput/${MOD_NAME}/
+      - BuildOutput/${MOD_NAME}_v1.0.0.zip
+    expire_in: 30 days
+
+# ---------------------------------------------------------
+# Verify Build
+# ---------------------------------------------------------
+verify:
+  stage: verify
+  image: python:3.11-slim
+  needs: [package]
+  script:
+    - python3 -c "
+import json, sys, os
+required = [
+    'mod.json', 'icon.png', 'JohnWickArsenal.dll',
+    'johnwickarsenal.bundle', 'README.md'
+]
+mod_dir = 'BuildOutput/JohnWickArsenal'
+for f in required:
+    path = os.path.join(mod_dir, f)
+    if not os.path.exists(path):
+        print(f'MISSING: {path}')
+        sys.exit(1)
+    print(f'OK: {f}')
+# Validate JSON
+with open(os.path.join(mod_dir, 'mod.json')) as f:
+    json.load(f)
+print('mod.json valid')
+print('All verification checks passed')
+"
+
+# ---------------------------------------------------------
+# Deploy to GitLab Package Registry (optional)
+# ---------------------------------------------------------
+deploy_package:
+  stage: deploy
+  image: ubuntu:22.04
+  needs: [verify]
+  only:
+    - tags
+  script:
+    - echo "Deploying to GitLab Package Registry..."
+    - curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      --form "package_file=@BuildOutput/${MOD_NAME}_v1.0.0.zip" \
+      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${MOD_NAME}/1.0.0/${MOD_NAME}_v1.0.0.zip"
+  rules:
+    - if: $CI_COMMIT_TAG
+
+# ---------------------------------------------------------
+# Cache configuration
+# ---------------------------------------------------------
+cache:
+  key: ${UNITY_CACHE_KEY}
+  paths:
+    - UnityProject/Library/
+    - ~/.nuget/packages/
+  policy: pull-push
