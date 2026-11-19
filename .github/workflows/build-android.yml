@@ -100,6 +100,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore Unity cache
+        id: restore_unity_cache
         uses: actions/cache@v4
         with:
           path: /opt/unity
@@ -138,6 +139,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore Android SDK cache
+        id: restore_android_cache
         uses: actions/cache@v4
         with:
           path: /opt/android-sdk
@@ -233,6 +235,7 @@ jobs:
       UNITY_EXECUTABLE: /opt/unity/Editor/Unity
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
