@@ -117,16 +117,16 @@ jobs:
           wget -q "$UNITY_URL" -O /tmp/Unity.tar.xz
           sudo mkdir -p /opt/unity
           sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
-          echo "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> $GITHUB_ENV
+          echo "UNITY_EXECUTABLE=/opt/unity/Unity" >> $GITHUB_ENV
           echo "Unity installation directory:"
           ls -la /opt/unity
           echo "Searching for Unity executable:"
           find /opt/unity -maxdepth 5 -type f -name Unity -print
-          ls -la /opt/unity/Editor/Unity
+          ls -la /opt/unity/Unity
 
       - name: Verify Unity installation
         run: |
-          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Editor/Unity}
+          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Unity}
           $UNITY_EXECUTABLE -version
 
       - name: Restore .NET cache
@@ -236,7 +236,7 @@ jobs:
     needs: [setup, install_dependencies, build_dll]
     timeout-minutes: 60
     env:
-      UNITY_EXECUTABLE: /opt/unity/Editor/Unity
+      UNITY_EXECUTABLE: /opt/unity/Unity
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
     steps:
@@ -252,7 +252,7 @@ jobs:
           wget --show-progress "$UNITY_URL" -O /tmp/Unity.tar.xz
           sudo mkdir -p /opt/unity
           sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity
-          test -x /opt/unity/Editor/Unity
+          test -x /opt/unity/Unity
 
       - name: Restore Unity Library cache
         uses: actions/cache@v4
