@@ -118,6 +118,10 @@ jobs:
           sudo mkdir -p /opt/unity
           sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
           echo "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> $GITHUB_ENV
+          echo "Unity installation directory:"
+          ls -la /opt/unity
+          echo "Searching for Unity executable:"
+          find /opt/unity -maxdepth 5 -type f -name Unity -print
           ls -la /opt/unity/Editor/Unity
 
       - name: Verify Unity installation
