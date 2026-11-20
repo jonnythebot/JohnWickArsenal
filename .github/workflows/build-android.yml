@@ -113,10 +113,10 @@ jobs:
         if: steps.restore_unity_cache.outputs.cache-hit != 'true'
         run: |
           echo "Installing Unity ${{ env.UNITY_VERSION }}..."
-          UNITY_URL="https://download.unity3d.com/download_unity/${{ env.UNITY_VERSION }}/LinuxEditorInstaller/Unity.tar.xz"
+          UNITY_URL="https://download.unity3d.com/download_unity/61c2feb0970d/LinuxEditorInstaller/Unity-2022.3.20f1.tar.xz"
           wget -q "$UNITY_URL" -O /tmp/Unity.tar.xz
-          mkdir -p /opt/unity
-          tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
+          sudo mkdir -p /opt/unity
+          sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1
           echo "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> $GITHUB_ENV
           ls -la /opt/unity/Editor/Unity
 
@@ -241,6 +241,14 @@ jobs:
         with:
           lfs: true
           fetch-depth: 0
+
+      - name: Install Unity Editor for AssetBundle build
+        run: |
+          UNITY_URL="https://download.unity3d.com/download_unity/61c2feb0970d/LinuxEditorInstaller/Unity-2022.3.20f1.tar.xz"
+          wget --show-progress "$UNITY_URL" -O /tmp/Unity.tar.xz
+          sudo mkdir -p /opt/unity
+          sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity
+          test -x /opt/unity/Editor/Unity
 
       - name: Restore Unity Library cache
         uses: actions/cache@v4
