@@ -156,6 +156,13 @@ jobs:
       - name: Install Android SDK
         if: steps.restore_android_cache.outputs.cache-hit != 'true'
         run: |
+          echo "Installing Java 17..."
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk
+          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+          export PATH="$JAVA_HOME/bin:$PATH"
+          java -version
+
           echo "Installing Android SDK command line tools..."
           mkdir -p /opt/android-sdk/cmdline-tools
           wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O /tmp/cmdtools.zip
