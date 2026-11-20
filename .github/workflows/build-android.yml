@@ -65,7 +65,7 @@ jobs:
   # ---------------------------------------------------------
   setup:
     name: Setup & Cache Keys
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       unity_cache_key: ${{ steps.cache_keys.outputs.unity }}
       dotnet_cache_key: ${{ steps.cache_keys.outputs.dotnet }}
@@ -89,7 +89,7 @@ jobs:
   # ---------------------------------------------------------
   install_dependencies:
     name: Install Dependencies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 30
     steps:
@@ -128,7 +128,7 @@ jobs:
         run: |
           export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Unity}
           sudo apt-get update
-          sudo apt-get install -y libxml2 libgtk-3-0 libnss3 libasound2t64
+          sudo apt-get install -y libxml2 libgtk-3-0 libnss3 libasound2
           $UNITY_EXECUTABLE -version
 
       - name: Restore .NET cache
@@ -184,7 +184,7 @@ jobs:
   # ---------------------------------------------------------
   build_dll:
     name: Build Managed DLL
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [setup, install_dependencies]
     timeout-minutes: 15
     steps:
@@ -234,7 +234,7 @@ jobs:
   # ---------------------------------------------------------
   build_bundle:
     name: Build AssetBundle (Unity)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [setup, install_dependencies, build_dll]
     timeout-minutes: 60
     env:
@@ -344,7 +344,7 @@ jobs:
   # ---------------------------------------------------------
   package:
     name: Package Mod
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build_dll, build_bundle]
     timeout-minutes: 10
     steps:
@@ -419,7 +419,7 @@ jobs:
   # ---------------------------------------------------------
   release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [package]
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
@@ -445,7 +445,7 @@ jobs:
   # ---------------------------------------------------------
   summary:
     name: Build Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build_dll, build_bundle, package]
     if: always()
     steps:
