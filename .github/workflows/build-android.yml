@@ -7,7 +7,7 @@
 
 name: Build Android Mod
 
-on:
+'on':
   workflow_dispatch:
     inputs:
       unity_version:
@@ -338,27 +338,27 @@ jobs:
       - name: Create CI-friendly Assembly Definition
         run: |
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Scripts/JohnWickArsenal/JohnWickArsenal.asmdef <<'EOF'
-{
-  "name": "JohnWickArsenal",
-  "references": [
-    "Unity.InputSystem",
-    "Unity.Addressables",
-    "Unity.XR.Management",
-    "Unity.XR.Oculus"
-  ],
-  "includePlatforms": [
-    "Android"
-  ],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
-}
-EOF
+          {
+            "name": "JohnWickArsenal",
+            "references": [
+              "Unity.InputSystem",
+              "Unity.Addressables",
+              "Unity.XR.Management",
+              "Unity.XR.Oculus"
+            ],
+            "includePlatforms": [
+              "Android"
+            ],
+            "excludePlatforms": [],
+            "allowUnsafeCode": false,
+            "overrideReferences": false,
+            "precompiledReferences": [],
+            "autoReferenced": true,
+            "defineConstraints": [],
+            "versionDefines": [],
+            "noEngineReferences": false
+          }
+          EOF
           echo "Created CI-friendly asmdef (without B&S references)"
 
       - name: Create Stub B&S Assemblies for Compilation
@@ -366,147 +366,147 @@ EOF
           # Create minimal stub assemblies so scripts can compile
           mkdir -p ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Modding.cs <<'EOF'
-namespace BladeAndSorcery.Modding
-{
-    using UnityEngine;
-    public class Mod : MonoBehaviour {}
-    public class ModBehavior : MonoBehaviour {}
-    public class ModOptionAttribute : System.Attribute {}
-    public class ModOptionSliderAttribute : System.Attribute { public ModOptionSliderAttribute(float min, float max) {} }
-    public class ModOptionToggleAttribute : System.Attribute {}
-    public class ModOptionButtonAttribute : System.Attribute { public ModOptionButtonAttribute(string label) {} }
-    public class ModOptionColorAttribute : System.Attribute {}
-}
-EOF
+          namespace BladeAndSorcery.Modding
+          {
+              using UnityEngine;
+              public class Mod : MonoBehaviour {}
+              public class ModBehavior : MonoBehaviour {}
+              public class ModOptionAttribute : System.Attribute {}
+              public class ModOptionSliderAttribute : System.Attribute { public ModOptionSliderAttribute(float min, float max) {} }
+              public class ModOptionToggleAttribute : System.Attribute {}
+              public class ModOptionButtonAttribute : System.Attribute { public ModOptionButtonAttribute(string label) {} }
+              public class ModOptionColorAttribute : System.Attribute {}
+          }
+          EOF
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Data.cs <<'EOF'
-namespace BladeAndSorcery.Data
-{
-    using UnityEngine;
-    public class ItemData : ScriptableObject {}
-    public class WeaponData : ItemData {}
-    public class GunData : WeaponData {}
-    public class MagazineData : ItemData {}
-    public class AmmoData : ItemData {}
-    public class ItemModuleData : ScriptableObject {}
-    public class WeaponModuleData : ItemModuleData {}
-    public class GunModuleData : WeaponModuleData {}
-    public class MagazineModuleData : ItemModuleData {}
-}
-EOF
+          namespace BladeAndSorcery.Data
+          {
+              using UnityEngine;
+              public class ItemData : ScriptableObject {}
+              public class WeaponData : ItemData {}
+              public class GunData : WeaponData {}
+              public class MagazineData : ItemData {}
+              public class AmmoData : ItemData {}
+              public class ItemModuleData : ScriptableObject {}
+              public class WeaponModuleData : ItemModuleData {}
+              public class GunModuleData : WeaponModuleData {}
+              public class MagazineModuleData : ItemModuleData {}
+          }
+          EOF
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Gameplay.cs <<'EOF'
-namespace BladeAndSorcery.Gameplay
-{
-    using UnityEngine;
-    using System.Collections.Generic;
+          namespace BladeAndSorcery.Gameplay
+          {
+              using UnityEngine;
+              using System.Collections.Generic;
 
-    public class Item : MonoBehaviour
-    {
-        public string itemId;
-        public virtual void OnHeld(RagdollHand hand) {}
-        public virtual void OnReleased(RagdollHand hand) {}
-        public virtual void OnFire() {}
-        public virtual void OnReloadStart() {}
-        public virtual void OnReloadEnd() {}
-        public virtual float GetRecoilMultiplier() { return 1f; }
-        public virtual float GetSpreadMultiplier() { return 1f; }
-    }
+              public class Item : MonoBehaviour
+              {
+                  public string itemId;
+                  public virtual void OnHeld(RagdollHand hand) {}
+                  public virtual void OnReleased(RagdollHand hand) {}
+                  public virtual void OnFire() {}
+                  public virtual void OnReloadStart() {}
+                  public virtual void OnReloadEnd() {}
+                  public virtual float GetRecoilMultiplier() { return 1f; }
+                  public virtual float GetSpreadMultiplier() { return 1f; }
+              }
 
-    public class Weapon : Item
-    {
-        public float reloadSpeedMultiplier = 1f;
-        public Magazine magazine;
-        public Transform muzzlePoint;
-        public Transform ejectionPort;
-        public Transform gripL;
-        public Transform gripR;
-        public Transform sightFront;
-        public Transform sightRear;
-    }
+              public class Weapon : Item
+              {
+                  public float reloadSpeedMultiplier = 1f;
+                  public Magazine magazine;
+                  public Transform muzzlePoint;
+                  public Transform ejectionPort;
+                  public Transform gripL;
+                  public Transform gripR;
+                  public Transform sightFront;
+                  public Transform sightRear;
+              }
 
-    public class Gun : Weapon
-    {
-        public int maxAmmo = 30;
-        public float fireRate = 600f;
-        public bool isAutomatic = true;
-        public Transform firePoint;
-        public AudioClip fireSound;
-        public AudioClip dryFireSound;
-        public AudioClip reloadSound;
-    }
+              public class Gun : Weapon
+              {
+                  public int maxAmmo = 30;
+                  public float fireRate = 600f;
+                  public bool isAutomatic = true;
+                  public Transform firePoint;
+                  public AudioClip fireSound;
+                  public AudioClip dryFireSound;
+                  public AudioClip reloadSound;
+              }
 
-    public class Magazine : Item
-    {
-        public int maxCapacity = 30;
-        public int CurrentAmmoCount { get; set; }
-        public AmmoData ammoData;
-        public Transform feedLips;
-        public List<Transform> bulletPositions;
-    }
+              public class Magazine : Item
+              {
+                  public int maxCapacity = 30;
+                  public int CurrentAmmoCount { get; set; }
+                  public AmmoData ammoData;
+                  public Transform feedLips;
+                  public List<Transform> bulletPositions;
+              }
 
-    public class Throwable : Item
-    {
-        public float throwForce = 20f;
-        public float damage = 10f;
-        public float explosionRadius = 2f;
-        public Transform tip;
-    }
+              public class Throwable : Item
+              {
+                  public float throwForce = 20f;
+                  public float damage = 10f;
+                  public float explosionRadius = 2f;
+                  public Transform tip;
+              }
 
-    public class WeaponBehavior : MonoBehaviour
-    {
-        protected Weapon weapon;
-        protected Gun gun;
-        protected Magazine magazine;
-        protected virtual void Awake() {}
-        protected virtual void OnHeld(RagdollHand hand) {}
-        protected virtual void OnReleased(RagdollHand hand) {}
-        protected virtual void OnFire() {}
-        protected virtual void OnReloadStart() {}
-        protected virtual void OnReloadEnd() {}
-        protected virtual float GetRecoilMultiplier() { return 1f; }
-        protected virtual float GetSpreadMultiplier() { return 1f; }
-    }
+              public class WeaponBehavior : MonoBehaviour
+              {
+                  protected Weapon weapon;
+                  protected Gun gun;
+                  protected Magazine magazine;
+                  protected virtual void Awake() {}
+                  protected virtual void OnHeld(RagdollHand hand) {}
+                  protected virtual void OnReleased(RagdollHand hand) {}
+                  protected virtual void OnFire() {}
+                  protected virtual void OnReloadStart() {}
+                  protected virtual void OnReloadEnd() {}
+                  protected virtual float GetRecoilMultiplier() { return 1f; }
+                  protected virtual float GetSpreadMultiplier() { return 1f; }
+              }
 
-    public class RagdollHand : MonoBehaviour
-    {
-        public enum Side { Left, Right }
-        public Side side;
-    }
+              public class RagdollHand : MonoBehaviour
+              {
+                  public enum Side { Left, Right }
+                  public Side side;
+              }
 
-    public class Creature : MonoBehaviour {}
-    public class Brain : MonoBehaviour {}
-    public class Player : Creature {}
-    public class NPC : Creature {}
-    public class Level : MonoBehaviour {}
-    public class Ammo : MonoBehaviour {}
-    public class EffectData : ScriptableObject {}
-    public class EffectInstance : MonoBehaviour {}
-}
-EOF
+              public class Creature : MonoBehaviour {}
+              public class Brain : MonoBehaviour {}
+              public class Player : Creature {}
+              public class NPC : Creature {}
+              public class Level : MonoBehaviour {}
+              public class Ammo : MonoBehaviour {}
+              public class EffectData : ScriptableObject {}
+              public class EffectInstance : MonoBehaviour {}
+          }
+          EOF
           # Create asmdef for stub assemblies
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Modding.asmdef <<'EOF'
-{
-  "name": "BladeAndSorcery.Modding",
-  "references": [],
-  "includePlatforms": ["Android"],
-  "allowUnsafeCode": false
-}
-EOF
+          {
+            "name": "BladeAndSorcery.Modding",
+            "references": [],
+            "includePlatforms": ["Android"],
+            "allowUnsafeCode": false
+          }
+          EOF
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Data.asmdef <<'EOF'
-{
-  "name": "BladeAndSorcery.Data",
-  "references": ["BladeAndSorcery.Modding"],
-  "includePlatforms": ["Android"],
-  "allowUnsafeCode": false
-}
-EOF
+          {
+            "name": "BladeAndSorcery.Data",
+            "references": ["BladeAndSorcery.Modding"],
+            "includePlatforms": ["Android"],
+            "allowUnsafeCode": false
+          }
+          EOF
           cat > ${{ env.UNITY_PROJECT_PATH }}/Assets/Plugins/BSCore/BladeAndSorcery.Gameplay.asmdef <<'EOF'
-{
-  "name": "BladeAndSorcery.Gameplay",
-  "references": ["BladeAndSorcery.Modding", "BladeAndSorcery.Data"],
-  "includePlatforms": ["Android"],
-  "allowUnsafeCode": false
-}
-EOF
+          {
+            "name": "BladeAndSorcery.Gameplay",
+            "references": ["BladeAndSorcery.Modding", "BladeAndSorcery.Data"],
+            "includePlatforms": ["Android"],
+            "allowUnsafeCode": false
+          }
+          EOF
           echo "Created stub B&S assemblies for CI compilation"
 
       - name: Activate Unity License
