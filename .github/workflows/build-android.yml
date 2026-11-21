@@ -99,6 +99,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 30
+    outputs:
+      unity_path: ${{ steps.set_unity_path.outputs.unity_path }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -106,59 +108,20 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      # --- Unity Installation ---
-      - name: Restore Unity cache
-        id: restore_unity_cache
-        uses: actions/cache@v4
-        with:
-          path: /opt/unity
-          key: ${{ needs.setup.outputs.unity_cache_key }}
-          restore-keys: |
-            unity-${{ env.UNITY_VERSION }}-
-            unity-
-
+      # --- Unity Installation (using game-ci/unity-installer) ---
       - name: Install Unity
-        if: steps.restore_unity_cache.outputs.cache-hit != 'true'
-        env:
-          UNITY_VERSION: ${{ env.UNITY_VERSION }}
-        run: |
-          echo "Installing Unity ${{ env.UNITY_VERSION }}..."
-          # Use official Unity download URL format
-          # Format: https://download.unity3d.com/download_unity/<hash>/LinuxEditorInstaller/Unity-<version>.tar.xz
-          # We need to fetch the hash for the specific version
-          UNITY_MAJOR=$(echo "${UNITY_VERSION}" | cut -d'.' -f1,2)  # 2022.3
-          UNITY_FULL="${UNITY_VERSION}"
-
-          # Download Unity using the known download pattern
-          # For 2022.3.x versions, use the public download URL
-          UNITY_URL="https://download.unity3d.com/download_unity/${UNITY_FULL}/LinuxEditorInstaller/Unity-${UNITY_FULL}.tar.xz"
-
-          echo "Attempting download from: $UNITY_URL"
-          wget --show-progress "$UNITY_URL" -O /tmp/Unity.tar.xz
-
-          if [ ! -f /tmp/Unity.tar.xz ] || [ $(stat -c%s /tmp/Unity.tar.xz) -lt 100000000 ]; then
-            echo "::warning::Download failed or file too small, trying fallback URL..."
-            # Fallback: try without hash in URL (older versions)
-            UNITY_URL_FALLBACK="https://download.unity3d.com/download_unity/Unity-${UNITY_FULL}.tar.xz"
-            wget --show-progress "$UNITY_URL_FALLBACK" -O /tmp/Unity.tar.xz
-          fi
-
-          sudo mkdir -p /opt/unity
-          sudo tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1 2>/dev/null || {
-            echo "::error::Failed to extract Unity. Checking download..."
-            ls -lh /tmp/Unity.tar.xz
-            file /tmp/Unity.tar.xz
-            exit 1
-          }
-          echo "UNITY_EXECUTABLE=/opt/unity/Unity" >> $GITHUB_ENV
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          # Cache is handled automatically by the action
 
       - name: Verify Unity installation
+        id: set_unity_path
         run: |
-          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Unity}
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq libxml2 libgtk-3-0 libnss3 libasound2 libgconf-2-4
-          $UNITY_EXECUTABLE -version
-          echo "Unity executable: $UNITY_EXECUTABLE"
+          echo "UNITY_EXECUTABLE=$UNITY_PATH" >> $GITHUB_ENV
+          echo "unity_path=$UNITY_PATH" >> $GITHUB_OUTPUT
+          $UNITY_PATH -version
+          echo "Unity executable: $UNITY_PATH"
 
       # --- .NET SDK ---
       - name: Restore .NET cache
@@ -283,7 +246,7 @@ jobs:
     needs: [setup, install_dependencies]
     timeout-minutes: 60
     env:
-      UNITY_EXECUTABLE: /opt/unity/Unity
+      UNITY_EXECUTABLE: ${{ needs.install_dependencies.outputs.unity_path }}
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
     steps:
