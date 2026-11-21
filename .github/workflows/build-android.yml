@@ -173,11 +173,28 @@ jobs:
       - name: Set Unity Docker image
         id: set_docker_image
         run: |
-          # Use unityci/editor image with Android support
+          # Try multiple unityci/editor tags until one works
           # Format: unityci/editor:<version>-android-<build>
-          echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_ENV
-          echo "unity_docker_image=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_OUTPUT
-          echo "Unity Docker image: unityci/editor:2022.3.20f1-android-1"
+          # Note: Not all versions have Android variants
+          for tag in \
+            "unityci/editor:2022.3.25f1-android-1" \
+            "unityci/editor:2022.3.20f1-android-1" \
+            "unityci/editor:2022.3.15f1-android-1" \
+            "unityci/editor:2022.3.25f1-base-1" \
+            "unityci/editor:2022.3.20f1-base-1" \
+            "unityci/editor:2022.3.15f1-base-1"; do
+            echo "Trying $tag..."
+            if docker manifest inspect "$tag" >/dev/null 2>&1; then
+              echo "UNITY_DOCKER_IMAGE=$tag" >> $GITHUB_ENV
+              echo "unity_docker_image=$tag" >> $GITHUB_OUTPUT
+              echo "Found working Unity Docker image: $tag"
+              break
+            fi
+          done
+          if [ -z "${UNITY_DOCKER_IMAGE:-}" ]; then
+            echo "::error::No working Unity Docker image found"
+            exit 1
+          fi
 
   # ---------------------------------------------------------
   # Build Managed DLL (LOCAL ONLY - requires B&S assemblies)
