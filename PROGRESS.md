@@ -66,33 +66,51 @@
 
 ---
 
-## Asset Replacement Initiative (NEW - High Priority)
+## Asset Replacement Initiative (IN PROGRESS)
 
-**Status:** Research complete, sources identified. Ready for download and integration.
+**Status:** 9/10 weapons replaced with high-quality CC0/CC-BY models. Equipment/Suits remain procedural for v1.0.
 
 ### Verified Free Asset Sources:
-1. **petroulacl FPS Asset Kit** (CC0) - 20 weapons, GLB/FBX/OBJ, 2K PBR textures ✅
-2. **Vinish.dev** (CC BY 4.0) - 10 weapons, GLB/GLTF/OBJ ✅
+1. **petroulacl FPS Asset Kit** (CC0) - 20 weapons, GLB/FBX/OBJ, 2K PBR textures ✅ **DOWNLOADED**
+2. **Vinish.dev** (CC BY 4.0) - 10 weapons, GLB/GLTF/OBJ ✅ **DOWNLOADED**
 3. **CC0Tree** (CC0) - Game-ready FBX models, weekly updates ✅
-4. **BlendSwap** (CC0/CC-BY) - Clothing, tactical gear, suits ✅
+4. **Sketchfab Tactical Gear** (CC BY 4.0) - 45.7k tris, equipment candidate ✅
 5. **Uju Studio/Sketchfab** (CC0) - Military weapons collection ✅
+6. **BlendSwap** (CC0/CC-BY) - Clothing, tactical gear (download requires auth) ⚠️
 
-### Replacement Plan:
-| Category | Count | Target Source | Status |
-|----------|-------|---------------|--------|
-| Weapons | 10 | petroulacl FPS Kit + Vinish.dev | 🔄 Ready to download |
-| Equipment | 11 | BlendSwap + Custom | 🔄 Ready to download |
-| Suits | 5 | BlendSwap + Custom | 🔄 Ready to download |
+### Replacement Progress:
+| Category | Count | Replaced | Target Source | Status |
+|----------|-------|----------|---------------|--------|
+| Weapons | 10 | 9/10 | petroulacl FPS Kit + Vinish.dev | ✅ **9 DONE** |
+| Equipment | 11 | 0/11 | Sketchfab/CC0Tree (v1.1+) | 🔄 v1.0 Procedural |
+| Suits | 5 | 0/5 | CC0Tree/Sketchfab (v1.1+) | 🔄 v1.0 Procedural |
 
-### Immediate Actions:
-- [ ] Download petroulacl FPS Asset Kit (~1.1 GB) - weapons
-- [ ] Download Vinish.dev weapons.zip (1.5 MB) - revolver, knife
-- [ ] Download BlendSwap CC0 clothing/tactical models - suits, holsters
-- [ ] Convert .blend → FBX/GLTF for Unity import
-- [ ] Replace procedural OBJ models in UnityProject/Assets/JohnWickArsenal/Models/
-- [ ] Update prefabs with new model hierarchies
-- [ ] Verify Quest performance (<25k tris/weapon)
-- [ ] Update ASSET_LICENSES.md with each replacement
+### Weapon Replacements Complete:
+| # | John Wick Weapon | Replacement | Source | License | File |
+|---|------------------|-------------|--------|---------|------|
+| 1 | HK P30L | Pistol_Compact_West | petroulacl FPS Kit | CC0 | HK_P30L.glb ✅ |
+| 2 | Glock 34 | Pistol_Full_West | petroulacl FPS Kit | CC0 | Glock_34.glb ✅ |
+| 3 | STI 2011 | Pistol_Compact_East | petroulacl FPS Kit | CC0 | STI_2011_CombatMaster.glb ✅ |
+| 4 | TTI Pit Viper | Pistol_Full_East | petroulacl FPS Kit | CC0 | TTI_PitViper.glb ✅ |
+| 5 | Benelli M4 | Shotgun_Auto_West | petroulacl FPS Kit | CC0 | Benelli_M4.glb ✅ |
+| 6 | Kel-Tec KSG | Shotgun_Pump_West | petroulacl FPS Kit | CC0 | KelTec_KSG.glb ✅ |
+| 7 | Remington 1875 | Revolver | Vinish.dev | CC BY 4.0 | Remington_1875.glb ✅ |
+| 8 | TTI TR-1 | Rifle_Battle_West | petroulacl FPS Kit | CC0 | TTI_TR1_Ultralight.glb ✅ |
+| 9 | Throwing Knife | Combat Knife | Vinish.dev | CC BY 4.0 | ThrowingKnife.glb ✅ |
+| 10 | Pencil | Keep procedural | — | — | Pencil.obj 🔄 |
+
+### Technical Updates:
+- ✅ JWA_AutoPrefabCreator.cs updated to support GLB + OBJ formats
+- ✅ 9 weapon GLB files copied to UnityProject/Assets/JohnWickArsenal/Models/
+- ✅ Procedural OBJ backups preserved in Backups/ProceduralModels/
+- ✅ ASSET_LICENSES.md created with full attribution
+
+### Next Steps:
+- [ ] Configure UNITY_LICENSE GitHub secret (ULF file) for CI build
+- [ ] Trigger GitHub Actions build to test GLB import + prefab creation
+- [ ] Download Sketchfab tactical gear for equipment (v1.1)
+- [ ] Download CC0Tree suit models for suits (v1.1)
+- [ ] Build real DLL locally with `./build.sh` (requires B&S Nomad)
 
 ---
 
