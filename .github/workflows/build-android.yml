@@ -174,10 +174,10 @@ jobs:
         id: set_docker_image
         run: |
           # Use unityci/editor image with Android support
-          # Format: unityci/editor:ubuntu-<version>-android-<build>
-          echo "UNITY_DOCKER_IMAGE=unityci/editor:ubuntu-2022.3.20f1-android-1" >> $GITHUB_ENV
-          echo "unity_docker_image=unityci/editor:ubuntu-2022.3.20f1-android-1" >> $GITHUB_OUTPUT
-          echo "Unity Docker image: unityci/editor:ubuntu-2022.3.20f1-android-1"
+          # Format: unityci/editor:<version>-android-<build>
+          echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_ENV
+          echo "unity_docker_image=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_OUTPUT
+          echo "Unity Docker image: unityci/editor:2022.3.20f1-android-1"
 
   # ---------------------------------------------------------
   # Build Managed DLL (LOCAL ONLY - requires B&S assemblies)
