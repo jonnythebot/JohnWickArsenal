@@ -490,13 +490,12 @@ jobs:
           echo "Created stub B&S assemblies for CI compilation"
 
       - name: Activate Unity License
-        if: env.UNITY_LICENSE != ''
+        if: secrets.UNITY_USERNAME != '' && secrets.UNITY_PASSWORD != ''
         run: |
           echo "Activating Unity license..."
           docker run --rm \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
-            -e UNITY_LICENSE="${{ secrets.UNITY_LICENSE }}" \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
@@ -504,6 +503,8 @@ jobs:
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -serial "${{ secrets.UNITY_SERIAL }}" || {
             echo "::warning::Unity license activation failed"
+            echo "Note: For CI builds, set UNITY_USERNAME, UNITY_PASSWORD, and UNITY_SERIAL as GitHub secrets"
+            echo "Or set UNITY_LICENSE with a license file content"
           }
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
