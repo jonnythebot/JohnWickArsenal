@@ -92,7 +92,7 @@ jobs:
           echo "android=android-${{ hashFiles('.github/workflows/build-android.yml') }}" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------
-  # Install Unity, .NET SDK, Android SDK
+  # Install .NET SDK and Android SDK (Unity will run in Docker)
   # ---------------------------------------------------------
   install_dependencies:
     name: Install Dependencies
@@ -100,28 +100,13 @@ jobs:
     needs: setup
     timeout-minutes: 30
     outputs:
-      unity_path: ${{ steps.set_unity_path.outputs.unity_path }}
+      unity_docker_image: ${{ steps.set_docker_image.outputs.unity_docker_image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
           fetch-depth: 0
-
-      # --- Unity Installation (using unity-ci/unity-installer) ---
-      - name: Install Unity
-        uses: unity-ci/unity-installer@v4
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          # Cache is handled automatically by the action
-
-      - name: Verify Unity installation
-        id: set_unity_path
-        run: |
-          echo "UNITY_EXECUTABLE=$UNITY_PATH" >> $GITHUB_ENV
-          echo "unity_path=$UNITY_PATH" >> $GITHUB_OUTPUT
-          $UNITY_PATH -version
-          echo "Unity executable: $UNITY_PATH"
 
       # --- .NET SDK ---
       - name: Restore .NET cache
@@ -183,6 +168,16 @@ jobs:
           export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
           adb version
 
+      # Unity will be run via Docker in the build_bundle job
+      - name: Set Unity Docker image
+        id: set_docker_image
+        run: |
+          # Use unityci/editor image with Android support
+          # Format: unityci/editor:<version>-android-<ndk_version>
+          echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_ENV
+          echo "unity_docker_image=unityci/editor:2022.3.20f1-android-1" >> $GITHUB_OUTPUT
+          echo "Unity Docker image: unityci/editor:2022.3.20f1-android-1"
+
   # ---------------------------------------------------------
   # Build Managed DLL (LOCAL ONLY - requires B&S assemblies)
   # This job runs in CI but will fail without B&S assemblies.
@@ -237,7 +232,7 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------
-  # Build AssetBundle with Unity (CI COMPATIBLE)
+  # Build AssetBundle with Unity (using Docker)
   # Uses pre-built DLL from local build or falls back to stub
   # ---------------------------------------------------------
   build_bundle:
@@ -246,7 +241,7 @@ jobs:
     needs: [setup, install_dependencies]
     timeout-minutes: 60
     env:
-      UNITY_EXECUTABLE: ${{ needs.install_dependencies.outputs.unity_path }}
+      UNITY_DOCKER_IMAGE: ${{ needs.install_dependencies.outputs.unity_docker_image }}
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
     steps:
@@ -472,40 +467,31 @@ jobs:
           EOF
           echo "Created stub B&S assemblies for CI compilation"
 
-      - name: Activate Unity License
+      - name: Activate Unity License (in Docker)
         if: env.UNITY_LICENSE != ''
         run: |
-          echo "Activating Unity license..."
-          $UNITY_EXECUTABLE \
-            -batchmode \
-            -quit \
-            -nographics \
-            -logFile - \
+          echo "Activating Unity license in Docker..."
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
+            -e UNITY_LICENSE="${{ secrets.UNITY_LICENSE }}" \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -logFile - \
             -username "${{ secrets.UNITY_USERNAME }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -serial "${{ secrets.UNITY_SERIAL }}" || {
-            echo "::warning::Unity license activation failed. Trying personal license..."
-            $UNITY_EXECUTABLE \
-              -batchmode \
-              -quit \
-              -nographics \
-              -logFile - \
-              -createManualActivationFile /tmp/unity_activation.alf || true
+            echo "::warning::Unity license activation failed"
           }
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
         run: |
-          cd ${{ env.UNITY_PROJECT_PATH }}
-
-          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Unity}
-          echo "Running Auto Prefab Creator..."
-          $UNITY_EXECUTABLE \
-            -batchmode \
-            -quit \
-            -nographics \
-            -projectPath ${{ env.UNITY_PROJECT_PATH }} \
+          echo "Running Auto Prefab Creator in Docker..."
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JohnWickArsenal.Editor.JWA_AutoPrefabCreator.RunFullPipeline \
-            -logFile - \
             2>&1 | tee prefab_creator.log
 
           EXIT_CODE=${PIPESTATUS[0]}
@@ -519,24 +505,16 @@ jobs:
 
       - name: Run Unity batch build
         run: |
-          cd ${{ env.UNITY_PROJECT_PATH }}
-
-          # Ensure we have a valid Unity executable
-          export UNITY_EXECUTABLE=${UNITY_EXECUTABLE:-/opt/unity/Unity}
-          if [ ! -x "$UNITY_EXECUTABLE" ]; then
-            echo "::error::Unity executable not found or not executable: $UNITY_EXECUTABLE"
-            exit 1
-          fi
-
-          echo "Starting Unity build..."
-          $UNITY_EXECUTABLE \
-            -batchmode \
-            -quit \
-            -projectPath ${{ env.UNITY_PROJECT_PATH }} \
+          echo "Starting Unity build in Docker..."
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
+            -v ${{ env.BUNDLE_OUTPUT }}:/output \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JWA_BuildAssetBundles.BuildBundle \
-            -logFile - \
             -buildTarget Android \
-            -outputPath ${{ env.BUNDLE_OUTPUT }} \
+            -outputPath /output \
             -bundleName johnwickarsenal \
             2>&1 | tee unity_build.log
 
