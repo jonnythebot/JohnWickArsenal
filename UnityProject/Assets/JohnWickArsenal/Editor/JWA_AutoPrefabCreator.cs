@@ -176,16 +176,21 @@ namespace JohnWickArsenal.Editor
                 return;
             }
 
-            Log("Scanning for OBJ models...");
+            Log("Scanning for OBJ/GLB models...");
 
             var objFiles = Directory.GetFiles(modelsPath, "*.obj", SearchOption.AllDirectories);
-            Log($"Found {objFiles.Length} OBJ files");
+            var glbFiles = Directory.GetFiles(modelsPath, "*.glb", SearchOption.AllDirectories);
+            var allModelFiles = new List<string>();
+            allModelFiles.AddRange(objFiles);
+            allModelFiles.AddRange(glbFiles);
 
-            foreach (var objFile in objFiles)
+            Log($"Found {objFiles.Length} OBJ files, {glbFiles.Length} GLB files");
+
+            foreach (var modelFile in allModelFiles)
             {
                 try
                 {
-                    string relativePath = objFile.Replace(Application.dataPath, "Assets");
+                    string relativePath = modelFile.Replace(Application.dataPath, "Assets");
                     Log($"Importing: {relativePath}");
 
                     // Force reimport
@@ -198,7 +203,7 @@ namespace JohnWickArsenal.Editor
                 }
                 catch (Exception e)
                 {
-                    Log($"Failed to import {objFile}: {e.Message}", LogType.Error);
+                    Log($"Failed to import {modelFile}: {e.Message}", LogType.Error);
                     errorCount++;
                 }
             }
@@ -279,14 +284,17 @@ namespace JohnWickArsenal.Editor
 
                 try
                 {
+                    string glbPath = $"Assets/JohnWickArsenal/Models/{modelPath}.glb";
                     string objPath = $"Assets/JohnWickArsenal/Models/{modelPath}.obj";
-                    if (!File.Exists(objPath))
+                    string modelPathFull = File.Exists(glbPath) ? glbPath : objPath;
+
+                    if (!File.Exists(modelPathFull))
                     {
-                        Log($"Model not found: {objPath}", LogType.Warning);
+                        Log($"Model not found: {glbPath} or {objPath}", LogType.Warning);
                         continue;
                     }
 
-                    CreatePrefabForWeapon(objPath, modelPath, category, weaponType, behaviorType);
+                    CreatePrefabForWeapon(modelPathFull, modelPath, category, weaponType, behaviorType);
                     processedCount++;
                 }
                 catch (Exception e)
@@ -306,16 +314,16 @@ namespace JohnWickArsenal.Editor
             Log($"Prefab creation complete. Processed: {processedCount}, Errors: {errorCount}");
         }
 
-        private void CreatePrefabForWeapon(string objPath, string modelPath, string category, string weaponType, string behaviorType)
+        private void CreatePrefabForWeapon(string modelFilePath, string modelPath, string category, string weaponType, string behaviorType)
         {
             string modelName = Path.GetFileNameWithoutExtension(modelPath);
             string weaponId = GenerateWeaponId(modelName, category);
 
             // Load the model
-            GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(objPath);
+            GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(modelFilePath);
             if (modelPrefab == null)
             {
-                Log($"Could not load model: {objPath}", LogType.Error);
+                Log($"Could not load model: {modelFilePath}", LogType.Error);
                 return;
             }
 
@@ -380,10 +388,13 @@ namespace JohnWickArsenal.Editor
                 string category = kvp.Value.category;
                 string type = kvp.Value.type;
 
+                string glbPath = $"Assets/JohnWickArsenal/Models/Equipment/{modelName}.glb";
                 string objPath = $"Assets/JohnWickArsenal/Models/Equipment/{modelName}.obj";
-                if (!File.Exists(objPath)) continue;
+                string modelFilePath = File.Exists(glbPath) ? glbPath : objPath;
 
-                GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(objPath);
+                if (!File.Exists(modelFilePath)) continue;
+
+                GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(modelFilePath);
                 if (modelPrefab == null) continue;
 
                 GameObject instance = PrefabUtility.InstantiatePrefab(modelPrefab) as GameObject;
@@ -431,10 +442,13 @@ namespace JohnWickArsenal.Editor
 
             foreach (string modelName in suits)
             {
+                string glbPath = $"Assets/JohnWickArsenal/Models/Suits/{modelName}.glb";
                 string objPath = $"Assets/JohnWickArsenal/Models/Suits/{modelName}.obj";
-                if (!File.Exists(objPath)) continue;
+                string modelFilePath = File.Exists(glbPath) ? glbPath : objPath;
 
-                GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(objPath);
+                if (!File.Exists(modelFilePath)) continue;
+
+                GameObject modelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(modelFilePath);
                 if (modelPrefab == null) continue;
 
                 GameObject instance = PrefabUtility.InstantiatePrefab(modelPrefab) as GameObject;

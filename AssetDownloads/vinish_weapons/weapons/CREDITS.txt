@@ -1,0 +1,15 @@
+Credit lines for Weapons (CC BY 4.0). Copy the lines for the models you use.
+
+"Pistol" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Revolver" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Assault Rifle" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Submachine Gun" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Pump Shotgun" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Sniper Rifle" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Rocket Launcher" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Hand Grenade" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Combat Knife" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+"Sci-Fi Blaster" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0
+
+If you use the whole pack, one line is enough:
+"Weapons" by vinish.dev (https://vinish.dev/free-3d-models/weapons/), CC BY 4.0

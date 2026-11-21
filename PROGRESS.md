@@ -66,6 +66,36 @@
 
 ---
 
+## Asset Replacement Initiative (NEW - High Priority)
+
+**Status:** Research complete, sources identified. Ready for download and integration.
+
+### Verified Free Asset Sources:
+1. **petroulacl FPS Asset Kit** (CC0) - 20 weapons, GLB/FBX/OBJ, 2K PBR textures ✅
+2. **Vinish.dev** (CC BY 4.0) - 10 weapons, GLB/GLTF/OBJ ✅
+3. **CC0Tree** (CC0) - Game-ready FBX models, weekly updates ✅
+4. **BlendSwap** (CC0/CC-BY) - Clothing, tactical gear, suits ✅
+5. **Uju Studio/Sketchfab** (CC0) - Military weapons collection ✅
+
+### Replacement Plan:
+| Category | Count | Target Source | Status |
+|----------|-------|---------------|--------|
+| Weapons | 10 | petroulacl FPS Kit + Vinish.dev | 🔄 Ready to download |
+| Equipment | 11 | BlendSwap + Custom | 🔄 Ready to download |
+| Suits | 5 | BlendSwap + Custom | 🔄 Ready to download |
+
+### Immediate Actions:
+- [ ] Download petroulacl FPS Asset Kit (~1.1 GB) - weapons
+- [ ] Download Vinish.dev weapons.zip (1.5 MB) - revolver, knife
+- [ ] Download BlendSwap CC0 clothing/tactical models - suits, holsters
+- [ ] Convert .blend → FBX/GLTF for Unity import
+- [ ] Replace procedural OBJ models in UnityProject/Assets/JohnWickArsenal/Models/
+- [ ] Update prefabs with new model hierarchies
+- [ ] Verify Quest performance (<25k tris/weapon)
+- [ ] Update ASSET_LICENSES.md with each replacement
+
+---
+
 ## Asset Generation Status
 
 ### Weapons (10/10 models generated ✓)
