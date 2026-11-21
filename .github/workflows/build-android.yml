@@ -65,6 +65,9 @@ env:
   CLEAN_BUILD: ${{ github.event.inputs.clean_build || 'true' }}
   # Unity license must be provided as secret for CI builds
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
 
 jobs:
   # ---------------------------------------------------------

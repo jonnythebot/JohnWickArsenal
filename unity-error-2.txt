@@ -1,0 +1,195 @@
+﻿2026-11-20T04:18:41.8614963Z Current runner version: '2.338.2'
+2026-11-20T04:18:41.8647983Z ##[group]Runner Image Provisioner
+2026-11-20T04:18:41.8649198Z Hosted Compute Agent
+2026-11-20T04:18:41.8649984Z Version: 20261103.629
+2026-11-20T04:18:41.8650831Z Commit: 15dbd9ccb5dbf34fae002b6ed1a2670f52df37bc
+2026-11-20T04:18:41.8651861Z Build Date: 2026-11-03T17:26:59Z
+2026-11-20T04:18:41.8652782Z Worker ID: {529c49be-191d-4b1a-901d-5122d7bf2abb}
+2026-11-20T04:18:41.8654264Z Region: westcentralus
+2026-11-20T04:18:41.8655038Z Cloud: Azure
+2026-11-20T04:18:41.8655718Z ##[endgroup]
+2026-11-20T04:18:41.8658335Z ##[group]Operating System
+2026-11-20T04:18:41.8659178Z Ubuntu
+2026-11-20T04:18:41.8659806Z 26.04.1
+2026-11-20T04:18:41.8660522Z LTS
+2026-11-20T04:18:41.8661185Z ##[endgroup]
+2026-11-20T04:18:41.8661949Z ##[group]Runner Image
+2026-11-20T04:18:41.8662827Z Image: ubuntu-26.04
+2026-11-20T04:18:41.8663612Z Version: 20261111.196.1
+2026-11-20T04:18:41.8665364Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261111.196/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-20T04:18:41.8667799Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261111.196
+2026-11-20T04:18:41.8669194Z ##[endgroup]
+2026-11-20T04:18:41.8670849Z ##[group]GITHUB_TOKEN Permissions
+2026-11-20T04:18:41.8673468Z Contents: read
+2026-11-20T04:18:41.8674202Z Metadata: read
+2026-11-20T04:18:41.8675075Z Packages: read
+2026-11-20T04:18:41.8675787Z ##[endgroup]
+2026-11-20T04:18:41.8679413Z Secret source: Actions
+2026-11-20T04:18:41.8680697Z Cache mode: write
+2026-11-20T04:18:41.8681688Z Prepare workflow directory
+2026-11-20T04:18:41.9578665Z Prepare all required actions
+2026-11-20T04:18:41.9667424Z Getting action download info
+2026-11-20T04:18:42.2355670Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-20T04:18:42.4812830Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-11-20T04:18:42.7141637Z Download action repository 'actions/setup-dotnet@v4' (SHA:67a3573c9a986a3f9c594539f4ab511d57bb3ce9)
+2026-11-20T04:18:43.4439313Z Complete job name: Install Dependencies
+2026-11-20T04:18:43.5212778Z ##[group]Run actions/checkout@v4
+2026-11-20T04:18:43.5213698Z with:
+2026-11-20T04:18:43.5214289Z   lfs: true
+2026-11-20T04:18:43.5214819Z   fetch-depth: 0
+2026-11-20T04:18:43.5215391Z   repository: jonnythebot/JohnWickArsenal
+2026-11-20T04:18:43.5220438Z   token: ***
+2026-11-20T04:18:43.5221020Z   ssh-strict: true
+2026-11-20T04:18:43.5221596Z   ssh-user: git
+2026-11-20T04:18:43.5222148Z   persist-credentials: true
+2026-11-20T04:18:43.5222733Z   clean: true
+2026-11-20T04:18:43.5223325Z   sparse-checkout-cone-mode: true
+2026-11-20T04:18:43.5224025Z   fetch-tags: false
+2026-11-20T04:18:43.5224593Z   show-progress: true
+2026-11-20T04:18:43.5225159Z   submodules: false
+2026-11-20T04:18:43.5225718Z   set-safe-directory: true
+2026-11-20T04:18:43.5226377Z   allow-unsafe-pr-checkout: false
+2026-11-20T04:18:43.5227660Z env:
+2026-11-20T04:18:43.5228215Z   MOD_NAME: JohnWickArsenal
+2026-11-20T04:18:43.5228892Z   UNITY_VERSION: 2022.3.20f1
+2026-11-20T04:18:43.5229659Z   UNITY_PROJECT_PATH: ./UnityProject
+2026-11-20T04:18:43.5230339Z   SOURCE_DIR: ./Source/JohnWickArsenal
+2026-11-20T04:18:43.5231028Z   ASSEMBLY_OUTPUT: ./Assemblies
+2026-11-20T04:18:43.5232099Z   BUNDLE_OUTPUT: ./AssetBundles/Android
+2026-11-20T04:18:43.5232782Z   MOD_OUTPUT: ./BuildOutput
+2026-11-20T04:18:43.5233380Z   CONFIGURATION: Release
+2026-11-20T04:18:43.5233988Z   CLEAN_BUILD: true
+2026-11-20T04:18:43.5234531Z ##[endgroup]
+2026-11-20T04:18:43.7927334Z Syncing repository: jonnythebot/JohnWickArsenal
+2026-11-20T04:18:43.7930880Z ##[group]Getting Git version info
+2026-11-20T04:18:43.7932608Z Working directory is '/home/runner/work/JohnWickArsenal/JohnWickArsenal'
+2026-11-20T04:18:43.7934928Z [command]/usr/bin/git version
+2026-11-20T04:18:43.7935891Z git version 2.56.1
+2026-11-20T04:18:43.7970287Z [command]/usr/bin/git lfs version
+2026-11-20T04:18:44.7527357Z git-lfs/3.8.1 (GitHub; linux amd64; go 1.27.3)
+2026-11-20T04:18:44.7544642Z ##[endgroup]
+2026-11-20T04:18:44.7564717Z Temporarily overriding HOME='/home/runner/work/_temp/323f5b91-48b8-4557-8fc2-4f31913318cc' before making global git config changes
+2026-11-20T04:18:44.7579273Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-20T04:18:44.7582720Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/JohnWickArsenal/JohnWickArsenal
+2026-11-20T04:18:44.7627877Z Deleting the contents of '/home/runner/work/JohnWickArsenal/JohnWickArsenal'
+2026-11-20T04:18:44.7631671Z ##[group]Initializing the repository
+2026-11-20T04:18:44.7644785Z [command]/usr/bin/git init /home/runner/work/JohnWickArsenal/JohnWickArsenal
+2026-11-20T04:18:44.7731296Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-20T04:18:44.7734663Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-20T04:18:44.7737786Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-20T04:18:44.7740606Z hint: call:
+2026-11-20T04:18:44.7742076Z hint:
+2026-11-20T04:18:44.7743960Z hint: 	git config --global init.defaultBranch <name>
+2026-11-20T04:18:44.7746209Z hint:
+2026-11-20T04:18:44.7748455Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-20T04:18:44.7751930Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-20T04:18:44.7764040Z hint:
+2026-11-20T04:18:44.7777817Z hint: 	git branch -m <name>
+2026-11-20T04:18:44.7780193Z hint:
+2026-11-20T04:18:44.7782990Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-20T04:18:44.7787538Z Initialized empty Git repository in /home/runner/work/JohnWickArsenal/JohnWickArsenal/.git/
+2026-11-20T04:18:44.7793950Z [command]/usr/bin/git remote add origin https://github.com/jonnythebot/JohnWickArsenal
+2026-11-20T04:18:44.7840244Z ##[endgroup]
+2026-11-20T04:18:44.7842996Z ##[group]Disabling automatic garbage collection
+2026-11-20T04:18:44.7845390Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-20T04:18:44.7856819Z ##[endgroup]
+2026-11-20T04:18:44.7867698Z ##[group]Setting up auth
+2026-11-20T04:18:44.7874035Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-20T04:18:44.7903823Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-20T04:18:44.8183391Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-20T04:18:44.8227758Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-20T04:18:44.8449857Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-20T04:18:44.8472083Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-20T04:18:44.8693719Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-20T04:18:44.8735732Z ##[endgroup]
+2026-11-20T04:18:44.8740635Z [command]/usr/bin/git lfs install --local
+2026-11-20T04:18:44.9111866Z Updated Git hooks.
+2026-11-20T04:18:44.9114183Z Git LFS initialized.
+2026-11-20T04:18:44.9123235Z ##[group]Fetching the repository
+2026-11-20T04:18:44.9133663Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-11-20T04:18:45.6814560Z From https://github.com/jonnythebot/JohnWickArsenal
+2026-11-20T04:18:45.6816351Z  * [new branch]      master     -> origin/master
+2026-11-20T04:18:45.6819161Z [command]/usr/bin/git branch --list --remote origin/master
+2026-11-20T04:18:45.6834804Z   origin/master
+2026-11-20T04:18:45.6857035Z [command]/usr/bin/git rev-parse refs/remotes/origin/master
+2026-11-20T04:18:45.6873872Z d87757acba7b9fc6617d0bf1984f6f179f86e5f9
+2026-11-20T04:18:45.6887771Z ##[endgroup]
+2026-11-20T04:18:45.6888536Z ##[group]Determining the checkout info
+2026-11-20T04:18:45.6890044Z ##[endgroup]
+2026-11-20T04:18:45.6890808Z ##[group]Fetching LFS objects
+2026-11-20T04:18:45.6891507Z [command]/usr/bin/git lfs fetch origin refs/remotes/origin/master
+2026-11-20T04:18:45.7480310Z Fetching reference refs/remotes/origin/master
+2026-11-20T04:18:46.1383573Z ##[endgroup]
+2026-11-20T04:18:46.1387017Z [command]/usr/bin/git sparse-checkout disable
+2026-11-20T04:18:46.2218089Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-20T04:18:46.2368839Z ##[group]Checking out the ref
+2026-11-20T04:18:46.2376714Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+2026-11-20T04:18:46.2575325Z Reset branch 'master'
+2026-11-20T04:18:46.2787782Z branch 'master' set up to track 'origin/master'.
+2026-11-20T04:18:46.3299578Z ##[endgroup]
+2026-11-20T04:18:46.3589288Z [command]/usr/bin/git log -1 --format=%H
+2026-11-20T04:18:46.3615021Z d87757acba7b9fc6617d0bf1984f6f179f86e5f9
+2026-11-20T04:18:46.5589389Z ##[group]Run actions/cache@v4
+2026-11-20T04:18:46.5589787Z with:
+2026-11-20T04:18:46.5590081Z   path: /opt/unity
+2026-11-20T04:18:46.5590591Z   key: unity-2022.3.20f1-d226e444ffde5d77ab6390016e3eee916dce44956f3ec50475b69514daa7c630
+2026-11-20T04:18:46.5591138Z   restore-keys: unity-2022.3.20f1-
+unity-
+
+2026-11-20T04:18:46.5591532Z   enableCrossOsArchive: false
+2026-11-20T04:18:46.5591941Z   fail-on-cache-miss: false
+2026-11-20T04:18:46.5592299Z   lookup-only: false
+2026-11-20T04:18:46.5592662Z   save-always: false
+2026-11-20T04:18:46.5592973Z env:
+2026-11-20T04:18:46.5593282Z   MOD_NAME: JohnWickArsenal
+2026-11-20T04:18:46.5593639Z   UNITY_VERSION: 2022.3.20f1
+2026-11-20T04:18:46.5593960Z   UNITY_PROJECT_PATH: ./UnityProject
+2026-11-20T04:18:46.5594347Z   SOURCE_DIR: ./Source/JohnWickArsenal
+2026-11-20T04:18:46.5594713Z   ASSEMBLY_OUTPUT: ./Assemblies
+2026-11-20T04:18:46.5595099Z   BUNDLE_OUTPUT: ./AssetBundles/Android
+2026-11-20T04:18:46.5595462Z   MOD_OUTPUT: ./BuildOutput
+2026-11-20T04:18:46.5595862Z   CONFIGURATION: Release
+2026-11-20T04:18:46.5596207Z   CLEAN_BUILD: true
+2026-11-20T04:18:46.5596660Z ##[endgroup]
+2026-11-20T04:18:46.7206895Z (node:2318) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-20T04:18:46.7208616Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-20T04:18:46.9180502Z Cache not found for input keys: unity-2022.3.20f1-d226e444ffde5d77ab6390016e3eee916dce44956f3ec50475b69514daa7c630, unity-2022.3.20f1-, unity-
+2026-11-20T04:18:46.9525384Z ##[group]Run echo "Installing Unity 2022.3.20f1..."
+2026-11-20T04:18:46.9526342Z [36;1mecho "Installing Unity 2022.3.20f1..."[0m
+2026-11-20T04:18:46.9527298Z [36;1mUNITY_URL="https://download.unity3d.com/download_unity/61c2feb0970d/LinuxEditorInstaller/Unity-2022.3.20f1.tar.xz"[0m
+2026-11-20T04:18:46.9528025Z [36;1mwget -q "$UNITY_URL" -O /tmp/Unity.tar.xz[0m
+2026-11-20T04:18:46.9528410Z [36;1msudo mkdir -p /opt/unity[0m
+2026-11-20T04:18:46.9528848Z [36;1msudo tar -xf /tmp/Unity.tar.xz -C /opt/unity --strip-components=1[0m
+2026-11-20T04:18:46.9529397Z [36;1mecho "UNITY_EXECUTABLE=/opt/unity/Editor/Unity" >> $GITHUB_ENV[0m
+2026-11-20T04:18:46.9529838Z [36;1mls -la /opt/unity/Editor/Unity[0m
+2026-11-20T04:18:46.9567742Z shell: /usr/bin/bash -e {0}
+2026-11-20T04:18:46.9568269Z env:
+2026-11-20T04:18:46.9568560Z   MOD_NAME: JohnWickArsenal
+2026-11-20T04:18:46.9568875Z   UNITY_VERSION: 2022.3.20f1
+2026-11-20T04:18:46.9569245Z   UNITY_PROJECT_PATH: ./UnityProject
+2026-11-20T04:18:46.9569715Z   SOURCE_DIR: ./Source/JohnWickArsenal
+2026-11-20T04:18:46.9570125Z   ASSEMBLY_OUTPUT: ./Assemblies
+2026-11-20T04:18:46.9570468Z   BUNDLE_OUTPUT: ./AssetBundles/Android
+2026-11-20T04:18:46.9570825Z   MOD_OUTPUT: ./BuildOutput
+2026-11-20T04:18:46.9571308Z   CONFIGURATION: Release
+2026-11-20T04:18:46.9571623Z   CLEAN_BUILD: true
+2026-11-20T04:18:46.9571969Z ##[endgroup]
+2026-11-20T04:18:46.9766452Z Installing Unity 2022.3.20f1...
+2026-11-20T04:26:37.0300458Z ls: cannot access '/opt/unity/Editor/Unity': No such file or directory
+2026-11-20T04:26:37.1132127Z ##[error]Process completed with exit code 2.
+2026-11-20T04:26:37.1844328Z Post job cleanup.
+2026-11-20T04:26:37.3237204Z [command]/usr/bin/git version
+2026-11-20T04:26:37.3307848Z git version 2.56.1
+2026-11-20T04:26:37.3463512Z Temporarily overriding HOME='/home/runner/work/_temp/276a29f5-bd63-4b48-b16a-8f42e33d3616' before making global git config changes
+2026-11-20T04:26:37.3464781Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-20T04:26:37.3642836Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/JohnWickArsenal/JohnWickArsenal
+2026-11-20T04:26:37.3644884Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-20T04:26:37.3647167Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-20T04:26:37.4394189Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-20T04:26:37.4410172Z http.https://github.com/.extraheader
+2026-11-20T04:26:37.4425747Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-20T04:26:37.4609722Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-20T04:26:37.4850043Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-20T04:26:37.4880895Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-20T04:26:37.5436223Z Cleaning up orphan processes
+2026-11-20T04:26:38.8096256Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4, actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

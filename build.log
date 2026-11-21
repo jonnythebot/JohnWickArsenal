@@ -1,0 +1,11 @@
+=== Build started at Fri Nov 20 20:15:57 PST 2026 ===
+╔═══════════════════════════════════════════════════════════════════╗
+║       JOHN WICK ARSENAL - AUTOMATED BUILD PIPELINE              ║
+║       Linux/ChromeOS Compatible • Remote Build Ready            ║
+╚══════════════════════════════════════════════════════════════════╝
+[INFO] Mod: JohnWickArsenal
+[INFO] Root: /home/wolfwolfwolf8586/JohnWickArsenal
+[INFO] Unity Project: /home/wolfwolfwolf8586/JohnWickArsenal/UnityProject
+[INFO] Target: Android
+[INFO] Config: Release
+[INFO] Remote Build: false

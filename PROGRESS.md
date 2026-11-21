@@ -40,7 +40,8 @@
 - [x] Configure Prefab Setup Wizard for batch import
 - [x] Create Unity Editor script for automated prefab creation from generated models
 - [x] **GitHub Actions workflow ready** - Uses official Unity Docker image
-- [ ] Configure GitHub Secrets for Unity license activation
+- [x] **Fixed workflow `if:` condition** - Added secrets to workflow-level env
+- [ ] Configure GitHub Secrets for Unity license activation (UNITY_LICENSE required)
 - [ ] Download built AssetBundle and DLL from artifacts
 - [ ] Package final mod ZIP
 
@@ -48,10 +49,20 @@
 
 ## Next Steps (Priority Order)
 
-1. **Configure GitHub Secrets** - Add UNITY_USERNAME, UNITY_PASSWORD, UNITY_SERIAL to repository secrets
-2. **Trigger GitHub Actions build** - Push to master or manual dispatch
+1. **Configure GitHub Secrets** (REQUIRED - Unity Personal needs ULF for headless CI):
+   - **UNITY_LICENSE** = content of `~/.local/share/unity3d/Unity/Unity_lic.ulf` (from local Unity activation)
+   - UNITY_USERNAME = jm28lockwood@yahoo.com
+   - UNITY_PASSWORD = 7461651aA@@@
+   - UNITY_SERIAL = (optional, for Pro/Enterprise)
+   - Go to: https://github.com/jonnythebot/JohnWickArsenal/settings/secrets/actions
+
+2. **Trigger GitHub Actions build** - Push to master or manual dispatch via Actions tab
+
 3. **Download built AssetBundle and DLL from artifacts** (once build completes)
+
 4. **Package final mod ZIP** with mod.json, icon.png, DLL, bundle, README
+
+5. **Build real DLL locally** - Run `./build.sh` (requires B&S Nomad installed) for production mod
 
 ---
 
