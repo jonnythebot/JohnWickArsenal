@@ -1,20 +1,17 @@
 {
-	"name": "JohnWickArsenal",
-	"references": [
-		"Unity.InputSystem",
-		"Unity.Addressables",
-		"Unity.XR.Management",
-		"Unity.XR.Oculus"
-	],
-	"includePlatforms": [
-		"Android"
-	],
-	"excludePlatforms": [],
-	"allowUnsafeCode": false,
-	"overrideReferences": false,
-	"precompiledReferences": [],
-	"autoReferenced": true,
-	"defineConstraints": [],
-	"versionDefines": [],
-	"noEngineReferences": false
+  "name": "JohnWickArsenal",
+  "references": [
+    "BladeAndSorcery.Modding",
+    "BladeAndSorcery.Data",
+    "BladeAndSorcery.Gameplay"
+  ],
+  "includePlatforms": [
+    "Android"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": []
 }

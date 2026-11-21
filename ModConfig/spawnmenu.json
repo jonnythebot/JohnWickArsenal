@@ -41,11 +41,141 @@
         { "id": "jwa_throwing_knife", "sortOrder": 1 },
         { "id": "jwa_pencil", "sortOrder": 2 }
       ]
+    },
+    {
+      "name": "Suits & Armor",
+      "icon": "jwa_suit_icon",
+      "items": [
+        { "id": "jwa_suit_chapter1", "sortOrder": 1, "label": "Ch.1 Tactical Suit (15% DR)" },
+        { "id": "jwa_suit_chapter2", "sortOrder": 2, "label": "Ch.2 Bulletproof Suit (25% DR)" },
+        { "id": "jwa_suit_chapter3", "sortOrder": 3, "label": "Ch.3 Armored Suit (35% DR)" },
+        { "id": "jwa_suit_chapter4", "sortOrder": 4, "label": "Ch.4 Parisian Suit (30% DR)" },
+        { "id": "jwa_suit_contractor", "sortOrder": 5, "label": "Contractor Suit (45% DR) ★" }
+      ]
+    },
+    {
+      "name": "Holsters",
+      "icon": "jwa_holster_icon",
+      "items": [
+        { "id": "jwa_shoulder_holster", "sortOrder": 1, "label": "Shoulder Holster (Double)" },
+        { "id": "jwa_hip_holster", "sortOrder": 2, "label": "Hip Holster (TTI Race)" },
+        { "id": "jwa_thigh_holster", "sortOrder": 3, "label": "Thigh Holster (Tactical)" },
+        { "id": "jwa_ankle_holster", "sortOrder": 4, "label": "Ankle Holster (Concealed)" }
+      ]
+    },
+    {
+      "name": "Magazine Pouches",
+      "icon": "jwa_pouch_icon",
+      "items": [
+        { "id": "jwa_chest_rig", "sortOrder": 1, "label": "Chest Rig (6 Mags)" },
+        { "id": "jwa_belt_pouches", "sortOrder": 2, "label": "Belt Pouches (4 Mags)" },
+        { "id": "jwa_shotgun_shell_carrier", "sortOrder": 3, "label": "Benelli M4 Shell Carrier (6)" },
+        { "id": "jwa_ksg_shell_carrier", "sortOrder": 4, "label": "KSG Dual Tube Carrier (14)" }
+      ]
+    },
+    {
+      "name": "Throwable Carriers",
+      "icon": "jwa_throwable_icon",
+      "items": [
+        { "id": "jwa_knife_bandolier", "sortOrder": 1, "label": "Knife Bandolier (8 Knives)" },
+        { "id": "jwa_pencil_case", "sortOrder": 2, "label": "Tactical Pencil Case (3)" }
+      ]
+    },
+    {
+      "name": "NPC Enemies",
+      "icon": "jwa_npc_icon",
+      "items": [
+        { "id": "jwa_npc_assassin", "sortOrder": 1, "label": "Assassin (Dual P30L/Glock)" },
+        { "id": "jwa_npc_heavygunner", "sortOrder": 2, "label": "Heavy Gunner (M4/KSG)" },
+        { "id": "jwa_npc_tactical", "sortOrder": 3, "label": "Tactical Operator (TR-1/Glock)" },
+        { "id": "jwa_npc_cleaner", "sortOrder": 4, "label": "Cleaner (Pit Viper/Knives)" },
+        { "id": "jwa_npc_enforcer", "sortOrder": 5, "label": "Enforcer (M4/1875)" },
+        { "id": "jwa_npc_hightable_elite", "sortOrder": 6, "label": "High Table Elite ★ BOSS" }
+      ]
+    },
+    {
+      "name": "Complete Loadouts",
+      "icon": "jwa_loadout_icon",
+      "items": [
+        { "id": "jwa_loadout_chapter1", "sortOrder": 1, "label": "Chapter 1: P30L + M4 + Suit" },
+        { "id": "jwa_loadout_chapter2", "sortOrder": 2, "label": "Chapter 2: Glock 34 + Pit Viper + Suit" },
+        { "id": "jwa_loadout_chapter3", "sortOrder": 3, "label": "Chapter 3: STI 2011 + TR-1 + Suit" },
+        { "id": "jwa_loadout_chapter4", "sortOrder": 4, "label": "Chapter 4: Pit Viper + TR-1 + Suit" },
+        { "id": "jwa_loadout_baba_yaga", "sortOrder": 5, "label": "BABA YAGA ★ Full Arsenal" }
+      ]
     }
   ],
   "featuredItems": [
     "jwa_tti_pit_viper",
     "jwa_pencil",
-    "jwa_benelli_m4"
-  ]
+    "jwa_benelli_m4",
+    "jwa_suit_chapter4",
+    "jwa_npc_hightable_elite"
+  ],
+  "loadouts": {
+    "jwa_loadout_chapter1": {
+      "name": "Chapter 1 Loadout",
+      "description": "The original Baba Yaga kit. P30L, Benelli M4, Tactical Suit.",
+      "icon": "jwa_loadout_ch1_icon",
+      "suit": "jwa_suit_chapter1",
+      "holster": "jwa_shoulder_holster",
+      "pouches": ["jwa_belt_pouches", "jwa_shotgun_shell_carrier"],
+      "weapons": ["jwa_hk_p30l", "jwa_benelli_m4"],
+      "throwables": ["jwa_throwing_knife"],
+      "throwableCarrier": "jwa_knife_bandolier"
+    },
+    "jwa_loadout_chapter2": {
+      "name": "Chapter 2 Loadout",
+      "description": "Rome Continental. Glock 34, Pit Viper, Bulletproof Suit.",
+      "icon": "jwa_loadout_ch2_icon",
+      "suit": "jwa_suit_chapter2",
+      "holster": "jwa_shoulder_holster",
+      "pouches": ["jwa_belt_pouches"],
+      "weapons": ["jwa_glock_34", "jwa_tti_pit_viper"],
+      "throwables": ["jwa_throwing_knife", "jwa_pencil"],
+      "throwableCarrier": "jwa_knife_bandolier"
+    },
+    "jwa_loadout_chapter3": {
+      "name": "Chapter 3 Loadout",
+      "description": "Taran Tactical. STI 2011, TR-1, Armored Suit.",
+      "icon": "jwa_loadout_ch3_icon",
+      "suit": "jwa_suit_chapter3",
+      "holster": "jwa_hip_holster",
+      "pouches": ["jwa_chest_rig", "jwa_belt_pouches"],
+      "weapons": ["jwa_sti_2011_combat_master", "jwa_tti_tr1_ultralight"],
+      "throwables": ["jwa_throwing_knife"],
+      "throwableCarrier": "jwa_knife_bandolier"
+    },
+    "jwa_loadout_chapter4": {
+      "name": "Chapter 4 Loadout",
+      "description": "Paris/Osaka/New York. Pit Viper, TR-1, Parisian Suit.",
+      "icon": "jwa_loadout_ch4_icon",
+      "suit": "jwa_suit_chapter4",
+      "holster": "jwa_shoulder_holster",
+      "pouches": ["jwa_chest_rig", "jwa_belt_pouches"],
+      "weapons": ["jwa_tti_pit_viper", "jwa_tti_tr1_ultralight"],
+      "throwables": ["jwa_throwing_knife", "jwa_pencil"],
+      "throwableCarrier": "jwa_knife_bandolier"
+    },
+    "jwa_loadout_baba_yaga": {
+      "name": "BABA YAGA - Full Arsenal",
+      "description": "Everything. Every weapon, max armor, infinite ammo. You're the one they fear.",
+      "icon": "jwa_loadout_baba_icon",
+      "suit": "jwa_suit_contractor",
+      "holster": "jwa_shoulder_holster",
+      "pouches": ["jwa_chest_rig", "jwa_belt_pouches", "jwa_shotgun_shell_carrier", "jwa_knife_bandolier", "jwa_pencil_case"],
+      "weapons": [
+        "jwa_hk_p30l",
+        "jwa_glock_34",
+        "jwa_sti_2011_combat_master",
+        "jwa_tti_pit_viper",
+        "jwa_benelli_m4",
+        "jwa_keltec_ksg",
+        "jwa_remington_1875",
+        "jwa_tti_tr1_ultralight"
+      ],
+      "throwables": ["jwa_throwing_knife", "jwa_pencil"],
+      "throwableCarrier": "jwa_knife_bandolier"
+    }
+  }
 }

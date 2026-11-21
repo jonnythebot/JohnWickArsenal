@@ -8,6 +8,14 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!--
+      This project requires Blade & Sorcery game assemblies to compile.
+      These are NOT included in the repository (proprietary).
+      Set BLADE_SORCERY_PATH environment variable to your B&S Nomad installation path:
+      - Windows: C:\Program Files\Oculus\Software\Software\blade-and-sorcery\BladeAndSorcery_Data\Managed
+      - Linux/Steam: ~/.steam/steam/steamapps/common/Blade And Sorcery/BladeAndSorcery_Data/Managed
+      - Quest (adb): /sdcard/Mods/ (after mod installation)
+    -->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,38 +32,42 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
-  <!-- Unity/Blade & Sorcery References -->
-  <!-- These paths must be adjusted to your B&S installation -->
-  <ItemGroup>
+  <!-- Unity Engine References (resolved via Unity installation) -->
+  <!-- These are referenced from the Unity Editor installation when building locally -->
+  <ItemGroup Condition=" '$(UNITY_PATH)' != '' And Exists('$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll') ">
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
-      <HintPath>$(UNITY_PATH)/Editor/Data/Managed/UnityEngine/UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/Managed/UnityEngine/UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>$(UNITY_PATH)/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+      <HintPath>$(UNITY_PATH)/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
 
-  <!-- Blade & Sorcery Assemblies -->
-  <!-- Copy these from your B&S Nomad installation: /sdcard/Mods/ or PC version Managed folder -->
-  <ItemGroup Condition="Exists('$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll')">
+  <!-- Blade & Sorcery Assemblies (from game installation) -->
+  <!-- Copy these from your B&S Nomad installation to a local folder and set BLADE_SORCERY_PATH -->
+  <ItemGroup Condition=" '$(BLADE_SORCERY_PATH)' != '' And Exists('$(BLADE_SORCERY_PATH)/BladeAndSorcery.Modding.dll') ">
+    <Reference Include="BladeAndSorcery.Modding">
+      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Modding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="BladeAndSorcery.Data">
       <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll</HintPath>
       <Private>False</Private>
@@ -64,32 +76,20 @@
       <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Gameplay.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BladeAndSorcery.Controls">
-      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Controls.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BladeAndSorcery.Nomad">
-      <HintPath>$(BLADE_SORCERY_PATH)/BladeAndSorcery.Nomad.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
 
   <!-- Fallback: Reference from Unity project Library folder after opening in Unity once -->
-  <ItemGroup Condition="!Exists('$(BLADE_SORCERY_PATH)/BladeAndSorcery.Data.dll') And Exists('$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Data.dll')">
+  <ItemGroup Condition=" '$(BLADE_SORCERY_PATH)' == '' And Exists('$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Modding.dll') ">
+    <Reference Include="BladeAndSorcery.Modding">
+      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Modding.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="BladeAndSorcery.Data">
       <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Data.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BladeAndSorcery.Gameplay">
       <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Gameplay.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BladeAndSorcery.Controls">
-      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Controls.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BladeAndSorcery.Nomad">
-      <HintPath>$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Nomad.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -123,6 +123,12 @@
     <MakeDir Directories="$(ModOutputPath)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModOutputPath)" SkipUnchangedFiles="true" />
     <Message Text="Copied $(TargetFileName) to $(ModOutputPath)" Importance="high" />
+  </Target>
+
+  <!-- Warning if B&S assemblies not found -->
+  <Target Name="CheckBladeSorceryAssemblies" BeforeTargets="Build">
+    <Warning Text="BLADE_SORCERY_PATH not set or assemblies not found. DLL will not compile without B&S game assemblies."
+             Condition=" '$(BLADE_SORCERY_PATH)' == '' And !Exists('$(UNITY_PROJECT_PATH)/Library/ScriptAssemblies/BladeAndSorcery.Modding.dll') " />
   </Target>
 
 </Project>

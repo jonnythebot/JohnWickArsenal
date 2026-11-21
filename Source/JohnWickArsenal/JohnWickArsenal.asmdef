@@ -1,17 +1,9 @@
 {
   "name": "JohnWickArsenal",
   "references": [
-    "UnityEngine",
-    "UnityEngine.CoreModule",
-    "UnityEngine.PhysicsModule",
-    "UnityEngine.AudioModule",
-    "UnityEngine.AnimationModule",
-    "UnityEngine.InputLegacyModule",
-    "UnityEngine.UI",
+    "BladeAndSorcery.Modding",
     "BladeAndSorcery.Data",
-    "BladeAndSorcery.Gameplay",
-    "BladeAndSorcery.Controls",
-    "BladeAndSorcery.Nomad"
+    "BladeAndSorcery.Gameplay"
   ],
   "includePlatforms": [
     "Android"

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using BladeAndSorcery.Modding;
 using BladeAndSorcery.Data;
 using BladeAndSorcery.Gameplay;
 
@@ -11,6 +12,7 @@ namespace JohnWickArsenal
     /// <summary>
     /// Main mod entry point for John Wick Arsenal.
     /// Registers all weapons, items, and custom behaviors with the game.
+    /// Target: Blade & Sorcery Nomad 1.3.1
     /// </summary>
     public class JohnWickArsenal : Mod
     {
