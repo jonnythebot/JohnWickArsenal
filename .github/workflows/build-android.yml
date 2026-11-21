@@ -146,8 +146,9 @@ jobs:
           mkdir -p /opt/android-sdk/cmdline-tools
           wget -q "https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip" -O /tmp/cmdtools.zip
           unzip -q /tmp/cmdtools.zip -d /tmp/android-cmdtools
-          mkdir -p /opt/android-sdk/cmdline-tools/latest
-          mv /tmp/android-cmdtools/cmdline-tools/* /opt/android-sdk/cmdline-tools/latest/
+          # Remove existing latest directory to avoid mv conflict
+          rm -rf /opt/android-sdk/cmdline-tools/latest
+          mv /tmp/android-cmdtools/cmdline-tools /opt/android-sdk/cmdline-tools/latest
           test -x /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager
 
           # Accept licenses and install packages
