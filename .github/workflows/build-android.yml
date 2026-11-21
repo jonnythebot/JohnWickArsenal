@@ -497,9 +497,11 @@ jobs:
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         run: |
           echo "Activating Unity license..."
+          # Create a persistent volume for Unity license cache that will be reused in build step
+          docker volume create unity_license_cache
           docker run --rm \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
+            -v unity_license_cache:/root/.local/share/unity3d/Unity \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
@@ -509,7 +511,9 @@ jobs:
             echo "::warning::Unity license activation failed"
             echo "Note: For CI builds, set UNITY_USERNAME, UNITY_PASSWORD, and UNITY_SERIAL as GitHub secrets"
             echo "Or set UNITY_LICENSE with a license file content"
+            exit 1
           }
+          echo "✅ Unity license activated and cached in docker volume"
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
         run: |
@@ -517,6 +521,7 @@ jobs:
           docker run --rm \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
+            -v unity_license_cache:/root/.local/share/unity3d/Unity \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
@@ -536,10 +541,12 @@ jobs:
         run: |
           echo "Starting Unity build..."
           mkdir -p ${{ env.BUNDLE_OUTPUT }}
+          # Use the same license cache volume created during activation
           docker run --rm \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
             -v ${{ env.BUNDLE_OUTPUT }}:/output \
+            -v unity_license_cache:/root/.local/share/unity3d/Unity \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
