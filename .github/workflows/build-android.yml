@@ -92,13 +92,15 @@ jobs:
           echo "android=android-${{ hashFiles('.github/workflows/build-android.yml') }}" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------
-  # Install .NET SDK, Android SDK, and Unity (using game-ci/unity-installer)
+  # Install .NET SDK, Android SDK, and Unity (using official Unity Docker image)
   # ---------------------------------------------------------
   install_dependencies:
     name: Install Dependencies
     runs-on: ubuntu-22.04
     needs: setup
     timeout-minutes: 45
+    outputs:
+      unity_docker_image: ${{ steps.set_docker_image.outputs.unity_docker_image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -167,40 +169,36 @@ jobs:
           export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
           adb version
 
-      # --- Unity Installation (using game-ci/unity-installer) ---
-      - name: Restore Unity cache
-        uses: actions/cache@v4
-        with:
-          path: /opt/unity
-          key: unity-${{ env.UNITY_VERSION }}-${{ hashFiles('UnityProject/Packages/packages-lock.json') }}
-          restore-keys: |
-            unity-${{ env.UNITY_VERSION }}-
-
-      - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ hashFiles('UnityProject/Packages/packages-lock.json') }}
-          installLocation: /opt/unity/${{ env.UNITY_VERSION }}
-          customInstallPath: /opt/unity/${{ env.UNITY_VERSION }}
-          android: true
-          cacheServerEndpoint: ""
-
-      - name: Verify Unity installation
+      # --- Unity Installation (using official Unity Docker image) ---
+      - name: Set Unity Docker image
+        id: set_docker_image
         run: |
-          UNITY_EXE="/opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity"
-          if [ -f "$UNITY_EXE" ]; then
-            echo "✅ Unity installed at: $UNITY_EXE"
-            "$UNITY_EXE" -version
+          # Use official Unity Docker image from unityci/editor
+          # Format: unityci/editor:<version>-android-<build_number>
+          # For 2022.3.20f1, the available tag is 2022.3.20f1-android-4
+          if [ "${{ env.UNITY_VERSION }}" = "2022.3.20f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.20f1-android-4" >> $GITHUB_OUTPUT
+          elif [ "${{ env.UNITY_VERSION }}" = "2022.3.15f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.15f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.15f1-android-4" >> $GITHUB_OUTPUT
+          elif [ "${{ env.UNITY_VERSION }}" = "2022.3.25f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.25f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.25f1-android-4" >> $GITHUB_OUTPUT
           else
-            echo "::error::Unity not found at $UNITY_EXE"
-            ls -la /opt/unity/${{ env.UNITY_VERSION }}/ 2>/dev/null || echo "Directory not found"
+            echo "::error::Unsupported Unity version: ${{ env.UNITY_VERSION }}"
             exit 1
           fi
+          echo "Unity Docker image: ${{ env.UNITY_DOCKER_IMAGE }}"
 
-      - name: Set Unity executable path
+      - name: Verify Docker image exists
         run: |
-          echo "UNITY_EXE=/opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity" >> $GITHUB_ENV
+          docker pull ${{ env.UNITY_DOCKER_IMAGE }}
+          docker run --rm ${{ env.UNITY_DOCKER_IMAGE }} /opt/unity/Editor/Unity -version
+
+      - name: Set Unity executable path (for Docker)
+        run: |
+          echo "UNITY_EXE=docker run --rm -v ${{ env.UNITY_PROJECT_PATH }}:/project -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library -v ${{ env.BUNDLE_OUTPUT }}:/output ${{ env.UNITY_DOCKER_IMAGE }}" >> $GITHUB_ENV
 
   # ---------------------------------------------------------
   # Build Managed DLL (LOCAL ONLY - requires B&S assemblies)
@@ -267,7 +265,7 @@ jobs:
     env:
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
-      UNITY_EXE: /opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity
+      UNITY_DOCKER_IMAGE: ${{ needs.install_dependencies.outputs.unity_docker_image }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -495,8 +493,12 @@ jobs:
         if: env.UNITY_LICENSE != ''
         run: |
           echo "Activating Unity license..."
-          "${{ env.UNITY_EXE }}" \
-            -batchmode -quit -nographics -logFile - \
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
+            -e UNITY_LICENSE="${{ secrets.UNITY_LICENSE }}" \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -projectPath /project -logFile - \
             -username "${{ secrets.UNITY_USERNAME }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
             -serial "${{ secrets.UNITY_SERIAL }}" || {
@@ -506,8 +508,11 @@ jobs:
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
         run: |
           echo "Running Auto Prefab Creator..."
-          "${{ env.UNITY_EXE }}" \
-            -batchmode -quit -nographics -projectPath ${{ env.UNITY_PROJECT_PATH }} -logFile - \
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JohnWickArsenal.Editor.JWA_AutoPrefabCreator.RunFullPipeline \
             2>&1 | tee prefab_creator.log
 
@@ -524,11 +529,15 @@ jobs:
         run: |
           echo "Starting Unity build..."
           mkdir -p ${{ env.BUNDLE_OUTPUT }}
-          "${{ env.UNITY_EXE }}" \
-            -batchmode -quit -nographics -projectPath ${{ env.UNITY_PROJECT_PATH }} -logFile - \
+          docker run --rm \
+            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
+            -v ${{ env.BUNDLE_OUTPUT }}:/output \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JWA_BuildAssetBundles.BuildBundle \
             -buildTarget Android \
-            -outputPath ${{ env.BUNDLE_OUTPUT }} \
+            -outputPath /output \
             -bundleName johnwickarsenal \
             2>&1 | tee unity_build.log
 
