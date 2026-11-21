@@ -92,15 +92,13 @@ jobs:
           echo "android=android-${{ hashFiles('.github/workflows/build-android.yml') }}" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------
-  # Install .NET SDK and Android SDK (Unity will run in Docker)
+  # Install .NET SDK, Android SDK, and Unity (using game-ci/unity-installer)
   # ---------------------------------------------------------
   install_dependencies:
     name: Install Dependencies
     runs-on: ubuntu-22.04
     needs: setup
-    timeout-minutes: 30
-    outputs:
-      unity_docker_image: ${{ steps.set_docker_image.outputs.unity_docker_image }}
+    timeout-minutes: 45
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -169,15 +167,40 @@ jobs:
           export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin
           adb version
 
-      # Unity will be run via Docker in the build_bundle job
-      - name: Set Unity Docker image
-        id: set_docker_image
+      # --- Unity Installation (using game-ci/unity-installer) ---
+      - name: Restore Unity cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/unity
+          key: unity-${{ env.UNITY_VERSION }}-${{ hashFiles('UnityProject/Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-${{ env.UNITY_VERSION }}-
+
+      - name: Install Unity
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ hashFiles('UnityProject/Packages/packages-lock.json') }}
+          installLocation: /opt/unity/${{ env.UNITY_VERSION }}
+          customInstallPath: /opt/unity/${{ env.UNITY_VERSION }}
+          android: true
+          cacheServerEndpoint: ""
+
+      - name: Verify Unity installation
         run: |
-          # Use gableroux/unity3d which has reliable Android tags
-          # Format: gableroux/unity3d:<version>-android
-          echo "UNITY_DOCKER_IMAGE=gableroux/unity3d:2022.3.20f1-android" >> $GITHUB_ENV
-          echo "unity_docker_image=gableroux/unity3d:2022.3.20f1-android" >> $GITHUB_OUTPUT
-          echo "Unity Docker image: gableroux/unity3d:2022.3.20f1-android"
+          UNITY_EXE="/opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity"
+          if [ -f "$UNITY_EXE" ]; then
+            echo "✅ Unity installed at: $UNITY_EXE"
+            "$UNITY_EXE" -version
+          else
+            echo "::error::Unity not found at $UNITY_EXE"
+            ls -la /opt/unity/${{ env.UNITY_VERSION }}/ 2>/dev/null || echo "Directory not found"
+            exit 1
+          fi
+
+      - name: Set Unity executable path
+        run: |
+          echo "UNITY_EXE=/opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity" >> $GITHUB_ENV
 
   # ---------------------------------------------------------
   # Build Managed DLL (LOCAL ONLY - requires B&S assemblies)
@@ -233,7 +256,7 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------
-  # Build AssetBundle with Unity (using Docker)
+  # Build AssetBundle with Unity (using game-ci/unity-installer)
   # Uses pre-built DLL from local build or falls back to stub
   # ---------------------------------------------------------
   build_bundle:
@@ -242,9 +265,9 @@ jobs:
     needs: [setup, install_dependencies]
     timeout-minutes: 60
     env:
-      UNITY_DOCKER_IMAGE: ${{ needs.install_dependencies.outputs.unity_docker_image }}
       ANDROID_HOME: /opt/android-sdk
       ANDROID_SDK_ROOT: /opt/android-sdk
+      UNITY_EXE: /opt/unity/${{ env.UNITY_VERSION }}/Editor/Unity
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -468,15 +491,11 @@ jobs:
           EOF
           echo "Created stub B&S assemblies for CI compilation"
 
-      - name: Activate Unity License (in Docker)
+      - name: Activate Unity License
         if: env.UNITY_LICENSE != ''
         run: |
-          echo "Activating Unity license in Docker..."
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
-            -e UNITY_LICENSE="${{ secrets.UNITY_LICENSE }}" \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
+          echo "Activating Unity license..."
+          "${{ env.UNITY_EXE }}" \
             -batchmode -quit -nographics -logFile - \
             -username "${{ secrets.UNITY_USERNAME }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
@@ -486,12 +505,9 @@ jobs:
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
         run: |
-          echo "Running Auto Prefab Creator in Docker..."
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
-            -batchmode -quit -nographics -projectPath /project -logFile - \
+          echo "Running Auto Prefab Creator..."
+          "${{ env.UNITY_EXE }}" \
+            -batchmode -quit -nographics -projectPath ${{ env.UNITY_PROJECT_PATH }} -logFile - \
             -executeMethod JohnWickArsenal.Editor.JWA_AutoPrefabCreator.RunFullPipeline \
             2>&1 | tee prefab_creator.log
 
@@ -506,16 +522,13 @@ jobs:
 
       - name: Run Unity batch build
         run: |
-          echo "Starting Unity build in Docker..."
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
-            -v ${{ env.BUNDLE_OUTPUT }}:/output \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
-            -batchmode -quit -nographics -projectPath /project -logFile - \
+          echo "Starting Unity build..."
+          mkdir -p ${{ env.BUNDLE_OUTPUT }}
+          "${{ env.UNITY_EXE }}" \
+            -batchmode -quit -nographics -projectPath ${{ env.UNITY_PROJECT_PATH }} -logFile - \
             -executeMethod JWA_BuildAssetBundles.BuildBundle \
             -buildTarget Android \
-            -outputPath /output \
+            -outputPath ${{ env.BUNDLE_OUTPUT }} \
             -bundleName johnwickarsenal \
             2>&1 | tee unity_build.log
 
