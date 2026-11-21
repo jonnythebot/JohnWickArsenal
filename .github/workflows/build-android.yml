@@ -108,9 +108,9 @@ jobs:
           lfs: true
           fetch-depth: 0
 
-      # --- Unity Installation (using game-ci/unity-installer) ---
+      # --- Unity Installation (using unity-ci/unity-installer) ---
       - name: Install Unity
-        uses: game-ci/unity-installer@v4
+        uses: unity-ci/unity-installer@v4
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           # Cache is handled automatically by the action
