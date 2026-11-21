@@ -490,35 +490,54 @@ jobs:
           echo "Created stub B&S assemblies for CI compilation"
 
       - name: Activate Unity License
-        if: env.UNITY_USERNAME != '' && env.UNITY_PASSWORD != ''
+        if: env.UNITY_USERNAME != '' && env.UNITY_PASSWORD != '' || env.UNITY_LICENSE != ''
         env:
           UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "Activating Unity license..."
           # Create a persistent volume for Unity license cache that will be reused in build step
           docker volume create unity_license_cache
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v unity_license_cache:/root/.local/share/unity3d/Unity \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
-            /opt/unity/Editor/Unity \
-            -batchmode -quit -nographics -projectPath /project -logFile - \
-            -username "${{ env.UNITY_USERNAME }}" \
-            -password "${{ env.UNITY_PASSWORD }}" \
-            -serial "${{ env.UNITY_SERIAL }}" || {
-            echo "::warning::Unity license activation failed"
-            echo "Note: For CI builds, set UNITY_USERNAME, UNITY_PASSWORD, and UNITY_SERIAL as GitHub secrets"
-            echo "Or set UNITY_LICENSE with a license file content"
-            exit 1
-          }
-          echo "✅ Unity license activated and cached in docker volume"
+
+          if [ -n "${{ env.UNITY_LICENSE }}" ]; then
+            echo "Using UNITY_LICENSE file..."
+            # Write license file to the cache volume
+            docker run --rm \
+              -v unity_license_cache:/root/.local/share/unity3d/Unity \
+              alpine:latest \
+              sh -c "echo '${{ env.UNITY_LICENSE }}' > /root/.local/share/unity3d/Unity/Unity_lic.ulf"
+            echo "✅ Unity license file installed in docker volume"
+          else
+            echo "Using username/password activation..."
+            docker run --rm \
+              -v ${{ env.UNITY_PROJECT_PATH }}:/project \
+              -v unity_license_cache:/root/.local/share/unity3d/Unity \
+              ${{ env.UNITY_DOCKER_IMAGE }} \
+              /opt/unity/Editor/Unity \
+              -batchmode -quit -nographics -projectPath /project -logFile - \
+              -username "${{ env.UNITY_USERNAME }}" \
+              -password "${{ env.UNITY_PASSWORD }}" \
+              -serial "${{ env.UNITY_SERIAL }}" || {
+              echo "::error::Unity license activation failed"
+              echo "For Unity Personal in CI, you must provide a UNITY_LICENSE file (ULF format)"
+              echo "Generate it by activating Unity locally, then copy ~/.local/share/unity3d/Unity/Unity_lic.ulf"
+              exit 1
+            }
+            echo "✅ Unity license activated and cached in docker volume"
+          fi
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ models)
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "Running Auto Prefab Creator..."
-          docker run --rm \
+          DOCKER_ENV=""
+          if [ -n "${{ env.UNITY_LICENSE }}" ]; then
+            DOCKER_ENV="-e UNITY_LICENSE=${{ env.UNITY_LICENSE }}"
+          fi
+          docker run --rm $DOCKER_ENV \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
             -v unity_license_cache:/root/.local/share/unity3d/Unity \
@@ -538,11 +557,18 @@ jobs:
           fi
 
       - name: Run Unity batch build
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "Starting Unity build..."
           mkdir -p ${{ env.BUNDLE_OUTPUT }}
           # Use the same license cache volume created during activation
-          docker run --rm \
+          # Also pass UNITY_LICENSE env var if available (more reliable for Personal)
+          DOCKER_ENV=""
+          if [ -n "${{ env.UNITY_LICENSE }}" ]; then
+            DOCKER_ENV="-e UNITY_LICENSE=${{ env.UNITY_LICENSE }}"
+          fi
+          docker run --rm $DOCKER_ENV \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
             -v ${{ env.BUNDLE_OUTPUT }}:/output \
