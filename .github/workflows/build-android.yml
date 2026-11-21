@@ -498,6 +498,7 @@ jobs:
             -v /tmp/unity_activation:/root/.local/share/unity3d/Unity \
             -e UNITY_LICENSE="${{ secrets.UNITY_LICENSE }}" \
             ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
             -username "${{ secrets.UNITY_USERNAME }}" \
             -password "${{ secrets.UNITY_PASSWORD }}" \
@@ -512,6 +513,7 @@ jobs:
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
             ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JohnWickArsenal.Editor.JWA_AutoPrefabCreator.RunFullPipeline \
             2>&1 | tee prefab_creator.log
@@ -534,6 +536,7 @@ jobs:
             -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
             -v ${{ env.BUNDLE_OUTPUT }}:/output \
             ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
             -executeMethod JWA_BuildAssetBundles.BuildBundle \
             -buildTarget Android \
