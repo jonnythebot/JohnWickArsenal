@@ -499,8 +499,8 @@ jobs:
           printf '%s' "$UNITY_LICENSE" > /tmp/unity_license.txt
           # Debug: show file size and first 200 chars
           echo "License file size: $(wc -c < /tmp/unity_license.txt) bytes"
-          echo "License file first 200 chars:"
-          head -c 200 /tmp/unity_license.txt | cat -A
+          echo "License file first 500 chars:"
+          head -c 500 /tmp/unity_license.txt | cat -A
           echo ""
           # Check if license file is empty
           if [ ! -s /tmp/unity_license.txt ]; then
@@ -509,8 +509,10 @@ jobs:
             echo "No UNITY_LICENSE secret provided"
             exit 0
           fi
-          # Detect format
-          if grep -q "UnityEntitlementLicense" /tmp/unity_license.txt; then
+          # Detect format: XML license (Unity Personal/Plus/Pro named user) vs ULF (serial-based)
+          # XML format starts with <?xml and contains License/EntitlementLicense elements
+          # ULF format is binary/encrypted
+          if head -c 50 /tmp/unity_license.txt | grep -q "<?xml"; then
             echo "license_format=xml" >> $GITHUB_OUTPUT
             echo "Detected XML format (UnityEntitlementLicense.xml)"
           else
