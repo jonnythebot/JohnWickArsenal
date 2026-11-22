@@ -537,31 +537,19 @@ jobs:
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          # PRIORITY 1: Use UNITY_LICENSE file (XML/ULF) - works offline, includes headless entitlement
+          # For Unity 2022.3+, use UNITY_LICENSE environment variable with XML content
+          # This is the recommended approach for CI/CD with Unity Personal
           if [ -n "$LICENSE_FILE" ] && [ -s "$LICENSE_FILE" ]; then
-            echo "Using UNITY_LICENSE file (primary method)..."
-            if [ "$LICENSE_FORMAT" = "xml" ]; then
-              echo "Installing XML license (UnityEntitlementLicense.xml)..."
-              docker run --rm \
-                -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
-                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
-                alpine:latest \
-                sh -c "cp /tmp/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
-              echo "✅ Unity XML license file installed in docker volume"
-            else
-              echo "Installing ULF license (Unity_lic.ulf)..."
-              docker run --rm \
-                -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
-                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
-                alpine:latest \
-                sh -c "cp /tmp/unity_license.txt /root/.local/share/unity3d/Unity/Unity_lic.ulf"
-              echo "✅ Unity ULF license file installed in docker volume"
-            fi
+            echo "Preparing UNITY_LICENSE environment variable for build steps..."
+            # Read the license file content and export as environment variable
+            # We'll pass this to docker run via -e flag in build steps
+            cat "$LICENSE_FILE" > /tmp/unity_license_content.txt
+            echo "UNITY_LICENSE_CONTENT=$(cat /tmp/unity_license_content.txt | base64 -w0)" >> $GITHUB_ENV
+            echo "✅ Unity license content prepared for build steps"
             LICENSE_ACTIVATED=true
           fi
 
-          # PRIORITY 2: Fallback to username/password activation (requires internet)
-          # Only try if license file wasn't provided or failed
+          # Fallback: username/password activation (requires internet, works for Personal with seat)
           if [ -z "$LICENSE_ACTIVATED" ] && [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
             echo "Attempting username/password activation for Unity Personal (fallback)..."
             docker run --rm \
@@ -590,13 +578,25 @@ jobs:
           fi
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ/GLB models)
+        env:
+          UNITY_LICENSE_CONTENT: ${{ env.UNITY_LICENSE_CONTENT }}
         run: |
           echo "Running Auto Prefab Creator..."
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
-            -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
-            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+          DOCKER_ARGS=(
+            --rm
+            -v "${{ env.UNITY_PROJECT_PATH }}:/project"
+            -v "${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library"
+          )
+          # Add license environment variable if available
+          if [ -n "$UNITY_LICENSE_CONTENT" ]; then
+            echo "Using UNITY_LICENSE environment variable for activation..."
+            DOCKER_ARGS+=(-e "UNITY_LICENSE=$(echo "$UNITY_LICENSE_CONTENT" | base64 -d)")
+          else
+            # Fallback to mounted volumes
+            DOCKER_ARGS+=(-v "unity_license_cache_ulf:/root/.local/share/unity3d/Unity")
+            DOCKER_ARGS+=(-v "unity_license_cache_xml:/root/.config/unity3d/Unity/licenses")
+          fi
+          docker run "${DOCKER_ARGS[@]}" \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
@@ -613,16 +613,27 @@ jobs:
           fi
 
       - name: Run Unity batch build
+        env:
+          UNITY_LICENSE_CONTENT: ${{ env.UNITY_LICENSE_CONTENT }}
         run: |
           echo "Starting Unity build..."
           mkdir -p ${{ env.BUNDLE_OUTPUT }}
-          # Use both license cache volumes (ULF for serial, XML for named user)
-          docker run --rm \
-            -v ${{ env.UNITY_PROJECT_PATH }}:/project \
-            -v ${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library \
-            -v ${{ env.BUNDLE_OUTPUT }}:/output \
-            -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
-            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+          DOCKER_ARGS=(
+            --rm
+            -v "${{ env.UNITY_PROJECT_PATH }}:/project"
+            -v "${{ env.UNITY_PROJECT_PATH }}/Library:/project/Library"
+            -v "${{ env.BUNDLE_OUTPUT }}:/output"
+          )
+          # Add license environment variable if available
+          if [ -n "$UNITY_LICENSE_CONTENT" ]; then
+            echo "Using UNITY_LICENSE environment variable for activation..."
+            DOCKER_ARGS+=(-e "UNITY_LICENSE=$(echo "$UNITY_LICENSE_CONTENT" | base64 -d)")
+          else
+            # Fallback to mounted volumes
+            DOCKER_ARGS+=(-v "unity_license_cache_ulf:/root/.local/share/unity3d/Unity")
+            DOCKER_ARGS+=(-v "unity_license_cache_xml:/root/.config/unity3d/Unity/licenses")
+          fi
+          docker run "${DOCKER_ARGS[@]}" \
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
