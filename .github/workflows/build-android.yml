@@ -493,13 +493,11 @@ jobs:
           echo "Created stub B&S assemblies for CI compilation"
 
       - name: Prepare Unity License File
-        if: env.UNITY_LICENSE != ''
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        if: secrets.UNITY_LICENSE != ''
         run: |
           echo "Preparing Unity license file..."
           # Write license to file (GitHub Actions handles multi-line secrets properly here)
-          echo "${{ env.UNITY_LICENSE }}" > /tmp/unity_license.txt
+          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/unity_license.txt
           # Detect format
           if grep -q "UnityEntitlementLicense" /tmp/unity_license.txt; then
             echo "license_format=xml" >> $GITHUB_OUTPUT
@@ -512,7 +510,7 @@ jobs:
         id: prepare_license
 
       - name: Activate Unity License
-        if: env.UNITY_USERNAME != '' && env.UNITY_PASSWORD != '' || env.UNITY_LICENSE != ''
+        if: secrets.UNITY_USERNAME != '' && secrets.UNITY_PASSWORD != '' || secrets.UNITY_LICENSE != ''
         env:
           UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -525,7 +523,7 @@ jobs:
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          if [ -n "${{ env.UNITY_LICENSE }}" ] || [ -n "$LICENSE_FILE" ]; then
+          if [ -n "$LICENSE_FILE" ]; then
             echo "Using UNITY_LICENSE file..."
             if [ "$LICENSE_FORMAT" = "xml" ]; then
               echo "Installing XML license..."
