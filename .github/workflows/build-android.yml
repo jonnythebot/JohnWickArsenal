@@ -493,11 +493,13 @@ jobs:
           echo "Created stub B&S assemblies for CI compilation"
 
       - name: Prepare Unity License File
-        if: secrets.UNITY_LICENSE != ''
+        if: ${{ env.UNITY_LICENSE != '' }}
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         run: |
           echo "Preparing Unity license file..."
           # Write license to file (GitHub Actions handles multi-line secrets properly here)
-          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/unity_license.txt
+          echo "${{ env.UNITY_LICENSE }}" > /tmp/unity_license.txt
           # Detect format
           if grep -q "UnityEntitlementLicense" /tmp/unity_license.txt; then
             echo "license_format=xml" >> $GITHUB_OUTPUT
@@ -510,7 +512,7 @@ jobs:
         id: prepare_license
 
       - name: Activate Unity License
-        if: secrets.UNITY_USERNAME != '' && secrets.UNITY_PASSWORD != '' || secrets.UNITY_LICENSE != ''
+        if: ${{ env.UNITY_USERNAME != '' && env.UNITY_PASSWORD != '' || env.UNITY_LICENSE != '' }}
         env:
           UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
