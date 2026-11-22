@@ -537,10 +537,33 @@ jobs:
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          # For Unity Personal, use username/password activation (requires internet)
-          # The XML license file may not include headless entitlement for Personal tier
-          if [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
-            echo "Using username/password activation for Unity Personal..."
+          # PRIORITY 1: Use UNITY_LICENSE file (XML/ULF) - works offline, includes headless entitlement
+          if [ -n "$LICENSE_FILE" ] && [ -s "$LICENSE_FILE" ]; then
+            echo "Using UNITY_LICENSE file (primary method)..."
+            if [ "$LICENSE_FORMAT" = "xml" ]; then
+              echo "Installing XML license (UnityEntitlementLicense.xml)..."
+              docker run --rm \
+                -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
+                alpine:latest \
+                sh -c "cp /tmp/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
+              echo "✅ Unity XML license file installed in docker volume"
+            else
+              echo "Installing ULF license (Unity_lic.ulf)..."
+              docker run --rm \
+                -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
+                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
+                alpine:latest \
+                sh -c "cp /tmp/unity_license.txt /root/.local/share/unity3d/Unity/Unity_lic.ulf"
+              echo "✅ Unity ULF license file installed in docker volume"
+            fi
+            LICENSE_ACTIVATED=true
+          fi
+
+          # PRIORITY 2: Fallback to username/password activation (requires internet)
+          # Only try if license file wasn't provided or failed
+          if [ -z "$LICENSE_ACTIVATED" ] && [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
+            echo "Attempting username/password activation for Unity Personal (fallback)..."
             docker run --rm \
               -v ${{ env.UNITY_PROJECT_PATH }}:/project \
               -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
@@ -551,33 +574,18 @@ jobs:
               -username "${{ env.UNITY_USERNAME }}" \
               -password "${{ env.UNITY_PASSWORD }}" \
               -serial "${{ env.UNITY_SERIAL }}" || {
-              echo "::error::Unity license activation failed"
-              echo "Check that UNITY_USERNAME and UNITY_PASSWORD are correct and account has a valid Unity Personal seat"
+              echo "⚠ Username/password activation failed (HTTP 401 or other error)"
+              echo "  This may be due to: incorrect credentials, 2FA, or no seat assigned"
               exit 1
             }
-            echo "✅ Unity license activated and cached in docker volumes"
-          elif [ -n "$LICENSE_FILE" ]; then
-            echo "Using UNITY_LICENSE file..."
-            if [ "$LICENSE_FORMAT" = "xml" ]; then
-              echo "Installing XML license..."
-              docker run --rm \
-                -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
-                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
-                alpine:latest \
-                sh -c "cp /tmp/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
-              echo "✅ Unity XML license file installed in docker volume"
-            else
-              echo "Installing ULF license..."
-              docker run --rm \
-                -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
-                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
-                alpine:latest \
-                sh -c "cp /tmp/unity_license.txt /root/.local/share/unity3d/Unity/Unity_lic.ulf"
-              echo "✅ Unity ULF license file installed in docker volume"
-            fi
-          else
-            echo "::error::No Unity credentials or license file provided"
-            echo "Set UNITY_USERNAME/UNITY_PASSWORD secrets or UNITY_LICENSE secret"
+            echo "✅ Unity license activated via username/password and cached in docker volumes"
+            LICENSE_ACTIVATED=true
+          fi
+
+          # No license method worked
+          if [ -z "$LICENSE_ACTIVATED" ]; then
+            echo "::error::No Unity license could be activated"
+            echo "Provide UNITY_LICENSE secret (XML/ULF file) or valid UNITY_USERNAME/UNITY_PASSWORD"
             exit 1
           fi
 
