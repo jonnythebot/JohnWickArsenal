@@ -492,43 +492,58 @@ jobs:
           EOF
           echo "Created stub B&S assemblies for CI compilation"
 
+      - name: Prepare Unity License File
+        if: env.UNITY_LICENSE != ''
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          echo "Preparing Unity license file..."
+          # Write license to file (GitHub Actions handles multi-line secrets properly here)
+          echo "${{ env.UNITY_LICENSE }}" > /tmp/unity_license.txt
+          # Detect format
+          if grep -q "UnityEntitlementLicense" /tmp/unity_license.txt; then
+            echo "license_format=xml" >> $GITHUB_OUTPUT
+            echo "Detected XML format (UnityEntitlementLicense.xml)"
+          else
+            echo "license_format=ulf" >> $GITHUB_OUTPUT
+            echo "Detected ULF format (Unity_lic.ulf)"
+          fi
+          echo "license_file=/tmp/unity_license.txt" >> $GITHUB_OUTPUT
+        id: prepare_license
+
       - name: Activate Unity License
         if: env.UNITY_USERNAME != '' && env.UNITY_PASSWORD != '' || env.UNITY_LICENSE != ''
         env:
           UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          LICENSE_FORMAT: ${{ steps.prepare_license.outputs.license_format }}
+          LICENSE_FILE: ${{ steps.prepare_license.outputs.license_file }}
         run: |
           echo "Activating Unity license..."
           # Create persistent volumes for Unity license cache (both old and new locations)
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          if [ -n "${{ env.UNITY_LICENSE }}" ]; then
+          if [ -n "${{ env.UNITY_LICENSE }}" ] || [ -n "$LICENSE_FILE" ]; then
             echo "Using UNITY_LICENSE file..."
-            # Write license to temp file first (handles newlines/special chars), then copy to volume
-            echo "${{ env.UNITY_LICENSE }}" > /tmp/unity_license.txt
-
-            # Detect license format
-            if grep -q "UnityEntitlementLicense" /tmp/unity_license.txt; then
-              echo "Detected XML format (UnityEntitlementLicense.xml) - Unity Personal/Plus/Pro (named user)"
+            if [ "$LICENSE_FORMAT" = "xml" ]; then
+              echo "Installing XML license..."
               docker run --rm \
                 -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
-                -v /tmp/unity_license.txt:/tmp/unity_license.txt:ro \
+                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
                 alpine:latest \
                 sh -c "cp /tmp/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
               echo "✅ Unity XML license file installed in docker volume"
             else
-              echo "Detected ULF format (Unity_lic.ulf) - Unity Pro/Enterprise (serial-based)"
+              echo "Installing ULF license..."
               docker run --rm \
                 -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
-                -v /tmp/unity_license.txt:/tmp/unity_license.txt:ro \
+                -v $LICENSE_FILE:/tmp/unity_license.txt:ro \
                 alpine:latest \
                 sh -c "cp /tmp/unity_license.txt /root/.local/share/unity3d/Unity/Unity_lic.ulf"
               echo "✅ Unity ULF license file installed in docker volume"
             fi
-            rm /tmp/unity_license.txt
           else
             echo "Using username/password activation..."
             docker run --rm \
