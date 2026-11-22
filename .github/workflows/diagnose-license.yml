@@ -1,0 +1,223 @@
+name: Diagnose Unity License & Batch Mode
+
+on:
+  workflow_dispatch:
+    inputs:
+      unity_version:
+        description: 'Unity version to test'
+        required: false
+        default: '2022.3.20f1'
+        type: choice
+        options:
+          - '2022.3.20f1'
+          - '2022.3.15f1'
+          - '2022.3.25f1'
+
+env:
+  UNITY_VERSION: ${{ github.event.inputs.unity_version || '2022.3.20f1' }}
+
+jobs:
+  diagnose:
+    name: Diagnose License & Headless Unity
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Set Unity Docker image
+        id: set_docker_image
+        run: |
+          if [ "${{ env.UNITY_VERSION }}" = "2022.3.20f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-4" >> $GITHUB_ENV
+          elif [ "${{ env.UNITY_VERSION }}" = "2022.3.15f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.15f1-android-4" >> $GITHUB_ENV
+          elif [ "${{ env.UNITY_VERSION }}" = "2022.3.25f1" ]; then
+            echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.25f1-android-4" >> $GITHUB_ENV
+          else
+            echo "::error::Unsupported Unity version: ${{ env.UNITY_VERSION }}"
+            exit 1
+          fi
+          echo "Unity Docker image: ${{ env.UNITY_DOCKER_IMAGE }}"
+
+      - name: Verify Docker image
+        run: |
+          docker pull ${{ env.UNITY_DOCKER_IMAGE }}
+          docker run --rm ${{ env.UNITY_DOCKER_IMAGE }} /opt/unity/Editor/Unity -version
+
+      - name: Prepare License File
+        id: prepare_license
+        run: |
+          printf '%s' "$UNITY_LICENSE" > ${{ github.workspace }}/unity_license.txt
+          echo "License file size: $(wc -c < ${{ github.workspace }}/unity_license.txt) bytes"
+          echo "First 200 chars:"
+          head -c 200 ${{ github.workspace }}/unity_license.txt | cat -A
+          echo ""
+
+          if [ ! -s ${{ github.workspace }}/unity_license.txt ]; then
+            echo "license_format=none" >> $GITHUB_OUTPUT
+            echo "No UNITY_LICENSE secret provided"
+            exit 0
+          fi
+
+          if head -c 50 ${{ github.workspace }}/unity_license.txt | grep -q "<?xml"; then
+            echo "license_format=xml" >> $GITHUB_OUTPUT
+            echo "Detected: XML format (UnityEntitlementLicense.xml)"
+          else
+            echo "license_format=ulf" >> $GITHUB_OUTPUT
+            echo "Detected: ULF format (Unity_lic.ulf)"
+          fi
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Test License with Empty Project
+        if: steps.prepare_license.outputs.license_format == 'xml'
+        run: |
+          echo "=== Testing XML License with Empty Project ==="
+          docker volume create unity_license_cache_xml
+
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+            alpine:latest \
+            sh -c "cp /workspace/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml && echo 'License copied to XML volume' && ls -la /root/.config/unity3d/Unity/licenses/"
+
+          echo "Creating test project..."
+          docker run --rm \
+            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
+            -batchmode -quit -nographics \
+            -createProject /tmp/test_license_project \
+            -logFile - \
+            2>&1
+
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "LICENSE_VALID=true" >> $GITHUB_OUTPUT
+            echo "✅ License VALID - Empty project created successfully"
+            docker run --rm -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_license_project
+          else
+            echo "LICENSE_VALID=false" >> $GITHUB_OUTPUT
+            echo "❌ License INVALID - Failed to create project (exit code: $EXIT_CODE)"
+            docker run --rm -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_license_project 2>/dev/null || true
+            exit 1
+          fi
+        id: test_license
+        env:
+          UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
+
+      - name: Test License with Existing Project (No License)
+        run: |
+          echo "=== Testing Unity WITHOUT License (should fail) ==="
+          mkdir -p /tmp/minimal_project/Assets /tmp/minimal_project/ProjectSettings
+          printf 'm_EditorVersion: 2022.3.20f1\n' > /tmp/minimal_project/ProjectSettings/ProjectVersion.txt
+
+          docker run --rm \
+            -v /tmp/minimal_project:/project \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
+            -batchmode -quit -nographics \
+            -projectPath /project \
+            -logFile - \
+            2>&1 | tail -30
+
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "✅ Confirmed: Unity requires valid license (failed as expected without license)"
+          else
+            echo "⚠ Unexpected: Unity worked without license"
+          fi
+        env:
+          UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
+
+      - name: Test Batch Mode Execution
+        if: steps.test_license.outputs.LICENSE_VALID == 'true'
+        run: |
+          echo "=== Testing Batch Mode Static Method Execution ==="
+          mkdir -p /tmp/test_batch/Assets/Editor /tmp/test_batch/ProjectSettings
+
+          printf 'using UnityEngine;\nusing UnityEditor;\n\npublic static class TestBatchMode\n{\n    public static void RunTest()\n    {\n        Debug.Log("=== Batch Mode Test Started ===");\n        Debug.Log("Unity Version: " + Application.unityVersion);\n        Debug.Log("Platform: " + EditorUserBuildSettings.activeBuildTarget);\n        Debug.Log("✅ Static method executed successfully in batch mode");\n        EditorApplication.Exit(0);\n    }\n}\n' > /tmp/test_batch/Assets/Editor/TestBatchMode.cs
+
+          printf 'm_EditorVersion: 2022.3.20f1\n' > /tmp/test_batch/ProjectSettings/ProjectVersion.txt
+
+          docker run --rm \
+            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+            -v /tmp/test_batch:/project \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
+            -batchmode -quit -nographics \
+            -projectPath /project \
+            -executeMethod TestBatchMode.RunTest \
+            -logFile - \
+            2>&1
+
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ Batch mode static method execution WORKS"
+          else
+            echo "❌ Batch mode static method execution FAILED (exit code: $EXIT_CODE)"
+            exit 1
+          fi
+        env:
+          UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
+
+      - name: Test License with Username/Password (Fallback)
+        if: steps.prepare_license.outputs.license_format != 'xml' || steps.test_license.outputs.LICENSE_VALID != 'true'
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
+        run: |
+          echo "=== Testing Username/Password Activation ==="
+          if [ -z "${{ env.UNITY_USERNAME }}" ] || [ -z "${{ env.UNITY_PASSWORD }}" ]; then
+            echo "No UNITY_USERNAME/UNITY_PASSWORD secrets configured - skipping"
+            exit 0
+          fi
+
+          echo "Username: ${{ env.UNITY_USERNAME }}"
+          docker volume create unity_license_cache_ulf
+          docker volume create unity_license_cache_xml
+
+          docker run --rm \
+            -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
+            -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+            ${{ env.UNITY_DOCKER_IMAGE }} \
+            /opt/unity/Editor/Unity \
+            -batchmode -quit -nographics \
+            -createProject /tmp/test_cred_project \
+            -logFile - \
+            -username "${{ env.UNITY_USERNAME }}" \
+            -password "${{ env.UNITY_PASSWORD }}" \
+            -serial "${{ env.UNITY_SERIAL }}" \
+            2>&1
+
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ Username/password activation WORKS"
+            docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_cred_project
+          else
+            echo "❌ Username/password activation FAILED (exit code: $EXIT_CODE)"
+            echo "This indicates invalid credentials, 2FA enabled, or no Unity Personal seat"
+            docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_cred_project 2>/dev/null || true
+            exit 1
+          fi
+
+      - name: Summary
+        run: |
+          echo "=== DIAGNOSIS SUMMARY ==="
+          echo "Unity Version: ${{ env.UNITY_VERSION }}"
+          echo "Docker Image: ${{ steps.set_docker_image.outputs.unity_docker_image }}"
+          echo "License Format: ${{ steps.prepare_license.outputs.license_format }}"
+          if [ "${{ steps.test_license.outputs.LICENSE_VALID }}" = "true" ]; then
+            echo "XML License: VALID ✅"
+          else
+            echo "XML License: INVALID or NOT TESTED ❌"
+          fi
+          echo ""
+          echo "If XML license is valid, the main build workflow should work."
+          echo "If not, configure UNITY_USERNAME/UNITY_PASSWORD secrets for fallback."

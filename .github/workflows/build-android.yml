@@ -495,31 +495,29 @@ jobs:
       - name: Prepare Unity License File
         run: |
           echo "Preparing Unity license file..."
-          # Write license to file using env var (avoids secret expansion issues with multiline XML)
-          printf '%s' "$UNITY_LICENSE" > /tmp/unity_license.txt
+          # Write license to file in workspace (mounted into Docker, avoids GITHUB_OUTPUT limits)
+          printf '%s' "$UNITY_LICENSE" > ${{ github.workspace }}/unity_license.txt
           # Debug: show file size and first 200 chars
-          echo "License file size: $(wc -c < /tmp/unity_license.txt) bytes"
+          echo "License file size: $(wc -c < ${{ github.workspace }}/unity_license.txt) bytes"
           echo "License file first 500 chars:"
-          head -c 500 /tmp/unity_license.txt | cat -A
+          head -c 500 ${{ github.workspace }}/unity_license.txt | cat -A
           echo ""
           # Check if license file is empty
-          if [ ! -s /tmp/unity_license.txt ]; then
+          if [ ! -s ${{ github.workspace }}/unity_license.txt ]; then
             echo "license_format=" >> $GITHUB_OUTPUT
-            echo "license_file=" >> $GITHUB_OUTPUT
             echo "No UNITY_LICENSE secret provided"
             exit 0
           fi
           # Detect format: XML license (Unity Personal/Plus/Pro named user) vs ULF (serial-based)
           # XML format starts with <?xml and contains License/EntitlementLicense elements
           # ULF format is binary/encrypted
-          if head -c 50 /tmp/unity_license.txt | grep -q "<?xml"; then
+          if head -c 50 ${{ github.workspace }}/unity_license.txt | grep -q "<?xml"; then
             echo "license_format=xml" >> $GITHUB_OUTPUT
             echo "Detected XML format (UnityEntitlementLicense.xml)"
           else
             echo "license_format=ulf" >> $GITHUB_OUTPUT
             echo "Detected ULF format (Unity_lic.ulf)"
           fi
-          echo "license_file=/tmp/unity_license.txt" >> $GITHUB_OUTPUT
         id: prepare_license
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -530,16 +528,45 @@ jobs:
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
           LICENSE_FORMAT: ${{ steps.prepare_license.outputs.license_format }}
-          LICENSE_FILE: ${{ steps.prepare_license.outputs.license_file }}
         run: |
           echo "Activating Unity license..."
           # Create persistent volumes for Unity license cache (both old and new locations)
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          # For Unity Personal in CI, username/password activation is REQUIRED
-          # XML license files are machine-bound and won't work on CI runners
-          # UNITY_LICENSE env var only works with ULF format (Pro/Enterprise), not XML (Personal)
+          # Strategy 1: Try using UNITY_LICENSE secret (XML format - Unity Personal/Plus/Pro named user)
+          # Copy license file from workspace to Docker volume for XML format
+          if [ -s "${{ github.workspace }}/unity_license.txt" ] && [ "$LICENSE_FORMAT" = "xml" ]; then
+            echo "Using UNITY_LICENSE secret (XML format)..."
+            echo "Copying UnityEntitlementLicense.xml to Docker volume..."
+            docker run --rm \
+              -v ${{ github.workspace }}:/workspace \
+              -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+              alpine:latest \
+              sh -c "cp /workspace/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml && echo 'License copied to XML volume'"
+
+            # Test if license works with a minimal empty project
+            echo "Testing license with empty project..."
+            docker run --rm \
+              -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
+              -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
+              ${{ env.UNITY_DOCKER_IMAGE }} \
+              /opt/unity/Editor/Unity \
+              -batchmode -quit -nographics -createProject /tmp/test_project -logFile - \
+              2>&1 | tail -20
+
+            if [ ${PIPESTATUS[0]} -eq 0 ]; then
+              echo "✅ Unity license activated via XML license file"
+              # Clean up test project
+              docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_project
+              exit 0
+            else
+              echo "⚠ XML license file test failed, trying username/password fallback..."
+              docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_project 2>/dev/null || true
+            fi
+          fi
+
+          # Strategy 2: Username/password activation (Unity Personal - requires internet)
           if [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
             echo "Attempting username/password activation for Unity Personal..."
             echo "  Username: ${{ env.UNITY_USERNAME }}"
@@ -568,29 +595,28 @@ jobs:
               echo "  (Must NOT have 2FA enabled, or use an app password)"
               echo "  UNITY_SERIAL = [optional, for Pro/Enterprise]"
               echo ""
-              echo "ALTERNATIVE: Use Unity Pro/Enterprise license (ULF format)"
-              echo "  1. Get Unity_lic.ulf from ~/.local/share/unity3d/Unity/Unity_lic.ulf"
-              echo "  2. Set as UNITY_LICENSE secret (replaces username/password)"
+              echo "BETTER SOLUTION: Use UNITY_LICENSE secret with XML license file"
+              echo "  1. Copy ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
+              echo "  2. Set as UNITY_LICENSE secret in GitHub (replaces username/password)"
               echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
               exit 1
             }
             echo "✅ Unity license activated via username/password and cached in docker volumes"
           else
-            echo "::error::No UNITY_USERNAME/UNITY_PASSWORD secrets configured"
-            echo "Unity Personal REQUIRES username/password activation in CI"
-            echo "XML license files (UnityEntitlementLicense.xml) are machine-bound"
-            echo "and will NOT work on GitHub Actions runners"
+            echo "::error::No valid license method configured"
+            echo "Either provide UNITY_LICENSE secret (XML format) or UNITY_USERNAME/UNITY_PASSWORD"
             echo ""
-            echo "Set these secrets at:"
+            echo "For Unity Personal: Set UNITY_LICENSE secret to content of"
+            echo "  ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
+            echo ""
+            echo "Set secrets at:"
             echo "  https://github.com/jonnythebot/JohnWickArsenal/settings/secrets/actions"
-            echo "  UNITY_USERNAME = jm28lockwood@yahoo.com"
-            echo "  UNITY_PASSWORD = [password without 2FA]"
             exit 1
           fi
 
       - name: Run Auto Prefab Creator (Create prefabs from OBJ/GLB models)
         run: |
-          echo "Running Auto Prefab Creator..."
+          echo "Running Auto Prefab Creator (batch mode)..."
           # Use license cache volumes from activation step
           docker run --rm \
             -v ${{ env.UNITY_PROJECT_PATH }}:/project \
@@ -600,14 +626,14 @@ jobs:
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
-            -executeMethod JohnWickArsenal.Editor.JWA_AutoPrefabCreator.RunFullPipeline \
+            -executeMethod JWA_BatchPrefabCreator.RunFullPipeline \
             2>&1 | tee prefab_creator.log
 
           EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "::warning::Auto Prefab Creator had issues (exit code: $EXIT_CODE)"
+            echo "::error::Auto Prefab Creator failed (exit code: $EXIT_CODE)"
             cat prefab_creator.log
-            # Don't fail - continue to build attempt
+            exit $EXIT_CODE
           else
             echo "✅ Auto Prefab Creator completed successfully"
           fi
@@ -626,10 +652,7 @@ jobs:
             ${{ env.UNITY_DOCKER_IMAGE }} \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics -projectPath /project -logFile - \
-            -executeMethod JWA_BuildAssetBundles.BuildBundle \
-            -buildTarget Android \
-            -outputPath /output \
-            -bundleName johnwickarsenal \
+            -executeMethod JWA_BatchBuilder.BuildBundle \
             2>&1 | tee unity_build.log
 
           # Check exit code
