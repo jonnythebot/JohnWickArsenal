@@ -497,6 +497,11 @@ jobs:
           echo "Preparing Unity license file..."
           # Write license to file using env var (avoids secret expansion issues with multiline XML)
           printf '%s' "$UNITY_LICENSE" > /tmp/unity_license.txt
+          # Debug: show file size and first 200 chars
+          echo "License file size: $(wc -c < /tmp/unity_license.txt) bytes"
+          echo "License file first 200 chars:"
+          head -c 200 /tmp/unity_license.txt | cat -A
+          echo ""
           # Check if license file is empty
           if [ ! -s /tmp/unity_license.txt ]; then
             echo "license_format=" >> $GITHUB_OUTPUT
