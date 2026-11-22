@@ -109,9 +109,10 @@ jobs:
             echo "LICENSE_VALID=false" >> $GITHUB_OUTPUT
             echo "❌ License INVALID - Failed to create project (exit code: $EXIT_CODE)"
             docker run --rm -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_license_project 2>/dev/null || true
-            exit 1
+            # Don't exit - let fallback step run
           fi
         id: test_license
+        continue-on-error: true
         env:
           UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
 
