@@ -504,7 +504,7 @@ jobs:
           echo ""
           # Check if license file is empty
           if [ ! -s ${{ github.workspace }}/unity_license.txt ]; then
-            echo "license_format=" >> $GITHUB_OUTPUT
+            echo "license_format=none" >> $GITHUB_OUTPUT
             echo "No UNITY_LICENSE secret provided"
             exit 0
           fi
@@ -513,10 +513,10 @@ jobs:
           # ULF format is binary/encrypted
           if head -c 50 ${{ github.workspace }}/unity_license.txt | grep -q "<?xml"; then
             echo "license_format=xml" >> $GITHUB_OUTPUT
-            echo "Detected XML format (UnityEntitlementLicense.xml)"
+            echo "Detected XML format (UnityEntitlementLicense.xml) - NOTE: Requires licensing service"
           else
             echo "license_format=ulf" >> $GITHUB_OUTPUT
-            echo "Detected ULF format (Unity_lic.ulf)"
+            echo "Detected ULF format (Unity_lic.ulf) - RECOMMENDED for headless CI"
           fi
         id: prepare_license
         env:
@@ -534,9 +534,39 @@ jobs:
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
-          # Strategy 1: Try using UNITY_LICENSE secret (XML format - Unity Personal/Plus/Pro named user)
-          # Copy license file from workspace to Docker volume for XML format
-          if [ -s "${{ github.workspace }}/unity_license.txt" ] && [ "$LICENSE_FORMAT" = "xml" ]; then
+          LICENSE_ACTIVATED=false
+
+          # Strategy 1: Try ULF license format (RECOMMENDED for headless CI - works without licensing service)
+          if [ -s "${{ github.workspace }}/unity_license.txt" ] && [ "$LICENSE_FORMAT" = "ulf" ]; then
+            echo "Using UNITY_LICENSE secret (ULF format - RECOMMENDED)..."
+            echo "Copying Unity_lic.ulf to Docker volume..."
+            docker run --rm \
+              -v ${{ github.workspace }}:/workspace \
+              -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
+              alpine:latest \
+              sh -c "cp /workspace/unity_license.txt /root/.local/share/unity3d/Unity/Unity_lic.ulf && echo 'License copied to ULF volume'"
+
+            # Test if license works with a minimal empty project
+            echo "Testing ULF license with empty project..."
+            docker run --rm \
+              -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
+              ${{ env.UNITY_DOCKER_IMAGE }} \
+              /opt/unity/Editor/Unity \
+              -batchmode -quit -nographics -createProject /tmp/test_project -logFile - \
+              2>&1 | tail -20
+
+            if [ ${PIPESTATUS[0]} -eq 0 ]; then
+              echo "✅ Unity license activated via ULF license file"
+              docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity alpine:latest rm -rf /tmp/test_project
+              LICENSE_ACTIVATED=true
+            else
+              echo "⚠ ULF license file test failed"
+              docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity alpine:latest rm -rf /tmp/test_project 2>/dev/null || true
+            fi
+          fi
+
+          # Strategy 2: Try XML license format (Unity Personal/Plus/Pro named user - requires licensing service)
+          if [ "$LICENSE_ACTIVATED" = "false" ] && [ -s "${{ github.workspace }}/unity_license.txt" ] && [ "$LICENSE_FORMAT" = "xml" ]; then
             echo "Using UNITY_LICENSE secret (XML format)..."
             echo "Copying UnityEntitlementLicense.xml to Docker volume..."
             docker run --rm \
@@ -546,7 +576,7 @@ jobs:
               sh -c "cp /workspace/unity_license.txt /root/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml && echo 'License copied to XML volume'"
 
             # Test if license works with a minimal empty project
-            echo "Testing license with empty project..."
+            echo "Testing XML license with empty project..."
             docker run --rm \
               -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
               -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
@@ -557,17 +587,16 @@ jobs:
 
             if [ ${PIPESTATUS[0]} -eq 0 ]; then
               echo "✅ Unity license activated via XML license file"
-              # Clean up test project
               docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_project
-              exit 0
+              LICENSE_ACTIVATED=true
             else
-              echo "⚠ XML license file test failed, trying username/password fallback..."
+              echo "⚠ XML license file test failed"
               docker run --rm -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses alpine:latest rm -rf /tmp/test_project 2>/dev/null || true
             fi
           fi
 
-          # Strategy 2: Username/password activation (Unity Personal - requires internet)
-          if [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
+          # Strategy 3: Username/password activation (Unity Personal - requires internet, no 2FA)
+          if [ "$LICENSE_ACTIVATED" = "false" ] && [ -n "${{ env.UNITY_USERNAME }}" ] && [ -n "${{ env.UNITY_PASSWORD }}" ]; then
             echo "Attempting username/password activation for Unity Personal..."
             echo "  Username: ${{ env.UNITY_USERNAME }}"
             echo "  This requires internet access to Unity's licensing servers"
@@ -589,25 +618,27 @@ jobs:
               echo "SOLUTION: Update GitHub secrets at:"
               echo "  https://github.com/jonnythebot/JohnWickArsenal/settings/secrets/actions"
               echo ""
-              echo "Required secrets:"
-              echo "  UNITY_USERNAME = jm28lockwood@yahoo.com"
-              echo "  UNITY_PASSWORD = [your Unity account password]"
-              echo "  (Must NOT have 2FA enabled, or use an app password)"
-              echo "  UNITY_SERIAL = [optional, for Pro/Enterprise]"
+              echo "RECOMMENDED (works best in CI):"
+              echo "  1. On machine with Unity Hub: Copy ~/.local/share/unity3d/Unity/Unity_lic.ulf"
+              echo "  2. Set as UNITY_LICENSE secret in GitHub (ULF format - no licensing service needed)"
               echo ""
-              echo "BETTER SOLUTION: Use UNITY_LICENSE secret with XML license file"
-              echo "  1. Copy ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
-              echo "  2. Set as UNITY_LICENSE secret in GitHub (replaces username/password)"
+              echo "ALTERNATIVE (requires no 2FA):"
+              echo "  UNITY_USERNAME = jm28lockwood@yahoo.com"
+              echo "  UNITY_PASSWORD = [your Unity account password, no 2FA]"
+              echo "  UNITY_SERIAL = [optional, for Pro/Enterprise]"
               echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
               exit 1
             }
             echo "✅ Unity license activated via username/password and cached in docker volumes"
-          else
+            LICENSE_ACTIVATED=true
+          fi
+
+          if [ "$LICENSE_ACTIVATED" = "false" ]; then
             echo "::error::No valid license method configured"
-            echo "Either provide UNITY_LICENSE secret (XML format) or UNITY_USERNAME/UNITY_PASSWORD"
+            echo "Either provide UNITY_LICENSE secret (ULF or XML format) or UNITY_USERNAME/UNITY_PASSWORD"
             echo ""
-            echo "For Unity Personal: Set UNITY_LICENSE secret to content of"
-            echo "  ~/.config/unity3d/Unity/licenses/UnityEntitlementLicense.xml"
+            echo "BEST FOR CI: Set UNITY_LICENSE secret to content of"
+            echo "  ~/.local/share/unity3d/Unity/Unity_lic.ulf  (ULF format - works headless)"
             echo ""
             echo "Set secrets at:"
             echo "  https://github.com/jonnythebot/JohnWickArsenal/settings/secrets/actions"
