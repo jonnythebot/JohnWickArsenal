@@ -495,8 +495,8 @@ jobs:
       - name: Prepare Unity License File
         run: |
           echo "Preparing Unity license file..."
-          # Write license to file (GitHub Actions handles multi-line secrets properly here)
-          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/unity_license.txt
+          # Write license to file using env var (avoids secret expansion issues with multiline XML)
+          printf '%s' "$UNITY_LICENSE" > /tmp/unity_license.txt
           # Check if license file is empty
           if [ ! -s /tmp/unity_license.txt ]; then
             echo "license_format=" >> $GITHUB_OUTPUT
@@ -514,6 +514,8 @@ jobs:
           fi
           echo "license_file=/tmp/unity_license.txt" >> $GITHUB_OUTPUT
         id: prepare_license
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Activate Unity License
         env:
