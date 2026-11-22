@@ -33,10 +33,13 @@ jobs:
         run: |
           if [ "${{ env.UNITY_VERSION }}" = "2022.3.20f1" ]; then
             echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.20f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.20f1-android-4" >> $GITHUB_OUTPUT
           elif [ "${{ env.UNITY_VERSION }}" = "2022.3.15f1" ]; then
             echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.15f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.15f1-android-4" >> $GITHUB_OUTPUT
           elif [ "${{ env.UNITY_VERSION }}" = "2022.3.25f1" ]; then
             echo "UNITY_DOCKER_IMAGE=unityci/editor:2022.3.25f1-android-4" >> $GITHUB_ENV
+            echo "unity_docker_image=unityci/editor:2022.3.25f1-android-4" >> $GITHUB_OUTPUT
           else
             echo "::error::Unsupported Unity version: ${{ env.UNITY_VERSION }}"
             exit 1
@@ -47,6 +50,8 @@ jobs:
         run: |
           docker pull ${{ env.UNITY_DOCKER_IMAGE }}
           docker run --rm ${{ env.UNITY_DOCKER_IMAGE }} /opt/unity/Editor/Unity -version
+        env:
+          UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
 
       - name: Prepare License File
         id: prepare_license
@@ -88,7 +93,7 @@ jobs:
           echo "Creating test project..."
           docker run --rm \
             -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
+            "${UNITY_DOCKER_IMAGE}" \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics \
             -createProject /tmp/test_license_project \
@@ -118,7 +123,7 @@ jobs:
 
           docker run --rm \
             -v /tmp/minimal_project:/project \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
+            "${UNITY_DOCKER_IMAGE}" \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics \
             -projectPath /project \
@@ -147,7 +152,7 @@ jobs:
           docker run --rm \
             -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
             -v /tmp/test_batch:/project \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
+            "${UNITY_DOCKER_IMAGE}" \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics \
             -projectPath /project \
@@ -174,26 +179,26 @@ jobs:
           UNITY_DOCKER_IMAGE: ${{ steps.set_docker_image.outputs.unity_docker_image }}
         run: |
           echo "=== Testing Username/Password Activation ==="
-          if [ -z "${{ env.UNITY_USERNAME }}" ] || [ -z "${{ env.UNITY_PASSWORD }}" ]; then
+          if [ -z "${UNITY_USERNAME}" ] || [ -z "${UNITY_PASSWORD}" ]; then
             echo "No UNITY_USERNAME/UNITY_PASSWORD secrets configured - skipping"
             exit 0
           fi
 
-          echo "Username: ${{ env.UNITY_USERNAME }}"
+          echo "Username: ${UNITY_USERNAME}"
           docker volume create unity_license_cache_ulf
           docker volume create unity_license_cache_xml
 
           docker run --rm \
             -v unity_license_cache_ulf:/root/.local/share/unity3d/Unity \
             -v unity_license_cache_xml:/root/.config/unity3d/Unity/licenses \
-            ${{ env.UNITY_DOCKER_IMAGE }} \
+            "${UNITY_DOCKER_IMAGE}" \
             /opt/unity/Editor/Unity \
             -batchmode -quit -nographics \
             -createProject /tmp/test_cred_project \
             -logFile - \
-            -username "${{ env.UNITY_USERNAME }}" \
-            -password "${{ env.UNITY_PASSWORD }}" \
-            -serial "${{ env.UNITY_SERIAL }}" \
+            -username "${UNITY_USERNAME}" \
+            -password "${UNITY_PASSWORD}" \
+            -serial "${UNITY_SERIAL}" \
             2>&1
 
           EXIT_CODE=${PIPESTATUS[0]}
