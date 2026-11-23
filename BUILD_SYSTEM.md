@@ -38,5 +38,8 @@ The earlier shell helpers are preserved with a `.disabled` extension under `Tool
 
 - The original checkout has no checked-in prefab, scene, compiled runtime DLL, or Nomad Addressables export. The previous GitHub workflow could synthesize a dummy DLL. The current checks compile no managed assemblies and produce no release artifact.
 - The original package manifest referenced an invalid URP identifier and an unavailable Addressables version. The active project uses the built-in render pipeline with Addressables 1.21.21 available for authoring. The stale package lock was removed so Unity Hub can regenerate a resolved graph.
+- The original C# dependency checker also fails the static C# parser. Its assembly is gated with the other legacy tools.
 - The five BlendSwap downloads under `AssetDownloads/blendswap` contain HTML login pages. They sit outside `UnityProject/Assets` and require proper source downloads before anyone can use them as meshes.
 - Source validation, shell syntax, workflow lint, and a simulated editor invocation can run without Unity. Real Unity package resolution, C# compilation, texture import and material appearance, and Android bundle export still need the local editor.
+
+The [cosmetic asset inventory](UnityProject/Assets/JohnWickArsenal/Models/Cosmetics/ASSET_CREDITS.txt) lists the suit replacement, its backup, and the three new cosmetic source models. Blender import and rendering were checked. Local Unity import and Quest performance still need to be measured.
