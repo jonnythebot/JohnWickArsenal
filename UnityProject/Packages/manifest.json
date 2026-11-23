@@ -1,57 +1,10 @@
 {
   "dependencies": {
-    "com.unity.xr.management": "4.5.0",
-    "com.unity.xr.oculus": "4.5.0",
+    "com.unity.addressables": "1.21.21",
     "com.unity.inputsystem": "1.7.0",
-    "com.unity.addressables": "1.21.0",
-    "com.unity.urp": "14.0.8",
-    "com.unity.mobile.android-logcat": "1.1.0"
-  },
-  "scopedRegistries": [
-    {
-      "name": "Unity Registry",
-      "url": "https://packages.unity.com",
-      "scopes": [
-        "com.unity"
-      ]
-    }
-  ],
-  "lock": {
-    "com.unity.xr.management": {
-      "version": "4.5.0",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.xr.oculus": {
-      "version": "4.5.0",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.inputsystem": {
-      "version": "1.7.0",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.addressables": {
-      "version": "1.21.0",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.urp": {
-      "version": "14.0.8",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.mobile.android-logcat": {
-      "version": "1.1.0",
-      "depth": 0,
-      "source": "registry",
-      "url": "https://packages.unity.com"
-    }
+    "com.unity.mobile.android-logcat": "1.1.0",
+    "com.unity.modules.assetbundle": "1.0.0",
+    "com.unity.xr.management": "4.5.0",
+    "com.unity.xr.oculus": "4.5.0"
   }
 }

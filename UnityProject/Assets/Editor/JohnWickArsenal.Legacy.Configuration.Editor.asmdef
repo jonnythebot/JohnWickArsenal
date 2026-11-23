@@ -1,0 +1,10 @@
+{
+  "name": "JohnWickArsenal.Legacy.Configuration.Editor",
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "JWA_LEGACY_PROTOTYPE"
+  ]
+}

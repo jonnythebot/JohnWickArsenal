@@ -1,5 +1,7 @@
 # John Wick Arsenal - Installation Guide
 
+> **Development and build status:** See the [local build guide](BUILD_SYSTEM.md) for the supported Unity Hub workflow. This document records the original installation design. A playable package requires the official Nomad SDK export and headset verification.
+
 **Version:** 1.0.0  
 **Target:** Blade & Sorcery Nomad 1.3.1 on Meta Quest 2/3/Pro
 

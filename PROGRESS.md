@@ -1,5 +1,7 @@
 # John Wick Arsenal - Development Progress
 
+> Historical project log. See [Local Unity and Android build](BUILD_SYSTEM.md) for the current workflow.
+
 **Last Updated:** 2026-11-21
 **Target:** B&S Nomad 1.3.1 | Unity 2022.3 LTS | Meta Quest (ARM64)
 
