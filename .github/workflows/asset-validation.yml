@@ -12,215 +12,104 @@ jobs:
     name: Unity-free Asset Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pygltflib trimesh numpy pyyaml
-      
+
       - name: Run Unity-free asset validation
         run: |
           python3 Tools/validate_assets.py
-      
+
       - name: Upload validation log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: validation-output
-          path: |
-            validation.log
-  
+          path: validation.log
+
   project-structure-check:
     name: Project Structure Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Verify project structure
         run: |
-          # Check required directories
-          required_dirs=(
-            "UnityProject/Assets/JohnWickArsenal/Models"
-            "UnityProject/Assets/JohnWickArsenal/Prefabs"
-            "UnityProject/Assets/JohnWickArsenal/Editor"
-            "UnityProject/Assets/JohnWickArsenal/Scripts"
-            "UnityProject/Assets/LocalTools/Editor"
-            "UnityProject/Assets/Scripts/JohnWickArsenal"
-            "UnityProject/ProjectSettings"
-            "UnityProject/Packages"
-          )
-          
-          for dir in "${required_dirs[@]}"; do
-            if [ ! -d "$dir" ]; then
-              echo "❌ Missing directory: $dir"
-              exit 1
-            fi
-            echo "✅ $dir"
-          done
-          
-          # Check required files
-          required_files=(
-            "UnityProject/Packages/manifest.json"
-            "UnityProject/ProjectSettings/ProjectVersion.txt"
-            "UnityProject/Assets/JohnWickArsenal/Editor/JWA_DisplayPrefabGenerator.cs"
-            "UnityProject/Assets/JohnWickArsenal/Editor/JohnWickArsenal.Cosmetic.Editor.asmdef"
-            "UnityProject/Assets/JohnWickArsenal/Models/Pistols/TTI_PitViper.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/Pistols/Glock_34.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/AR15_AssaultRifle.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/AWP_SniperRifle.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/MP5_SubmachineGun.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/Remington870_PumpShotgun.glb"
-            "UnityProject/Assets/JohnWickArsenal/Models/Suits/ClassicBlackSuit.obj"
-            "UnityProject/Assets/JohnWickArsenal/Models/Suits/ClassicBlackSuit.mtl"
-            "UnityProject/Assets/JohnWickArsenal/Models/Suits/ClassicBlackSuit_Albedo.png"
-            "UnityProject/Assets/JohnWickArsenal/Models/Suits/ClassicBlackSuit_Bump.png"
-            "UnityProject/Assets/JohnWickArsenal/Prefabs/DisplayProps/DisplayPistol_TTI_PitViper.prefab"
-            "UnityProject/Assets/JohnWickArsenal/Editor/JWA_DisplayPrefabGenerator.cs"
-            "UnityProject/Assets/JohnWickArsenal/Editor/JohnWickArsenal.Cosmetic.Editor.asmdef"
-          )
-          
-          for file in "${required_files[@]}"; do
-            if [ ! -f "$file" ]; then
-              echo "❌ Missing file: $file"
-              exit 1
-            fi
-            echo "✅ $file"
-          done
-          
-          echo "✅ All required files and directories present"
-  
+          python3 Tools/ci/validate_structure.py
+
   manifest-check:
     name: Manifest & Version Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Validate manifest.json
         run: |
-          # Check manifest is valid JSON
-          python3 -c "import json; json.load(open('UnityProject/Packages/manifest.json'))"
-          echo "✅ manifest.json is valid JSON"
-          
-          # Check required dependencies
-          python3 -c "
-import json
-with open('UnityProject/Packages/manifest.json') as f:
-    m = json.load(f)
-deps = m.get('dependencies', {})
-required = ['com.unity.modules.assetbundle', 'com.unity.xr.oculus', 'com.unity.xr.management']
-for req in required:
-    if req not in deps:
-        print(f'⚠️ Missing: {req}')
-    else:
-        print(f'✅ {req}: {deps[req]}')
-"
-      
+          python3 Tools/ci/validate_manifest.py
+
       - name: Validate ProjectVersion.txt
         run: |
-          python3 -c "
-with open('UnityProject/ProjectSettings/ProjectVersion.txt') as f:
-    content = f.read()
-if '2022.3.20f1' not in content:
-    print('❌ ProjectVersion.txt does not pin 2022.3.20f1')
-    exit(1)
-if '61c2feb0970d' not in content:
-    print('⚠️ Missing revision 61c2feb0970d')
-else:
-    print('✅ ProjectVersion.txt correct')
-print(f'Content: {content.strip()}')
-"
-      
+          python3 Tools/ci/validate_version.py
+
       - name: Validate asmdef files
         run: |
-          python3 -c "
-import json
-import sys
-errors = 0
-for asmdef in ['UnityProject/Assets/JohnWickArsenal/Editor/JohnWickArsenal.Cosmetic.Editor.asmdef',
-               'UnityProject/Assets/JohnWickArsenal/Editor/JohnWickArsenal.Legacy.Pipeline.Editor.asmdef',
-               'UnityProject/Assets/Scripts/JohnWickArsenal/JohnWickArsenal.asmdef',
-               'UnityProject/Assets/Scripts/JohnWickArsenal/Tests/JohnWickArsenal.Tests.asmdef']:
-    with open(asmdef) as f:
-        content = json.load(f)
-    if 'name' not in content:
-        print(f'❌ {asmdef}: missing name')
-        errors += 1
-    else:
-        print(f'✅ {asmdef}: {content[\"name\"]}')
-    if 'Cosmetic.Editor' in content.get('name', '') and content.get('references'):
-        print(f'⚠️ Cosmetic asmdef has references: {content[\"references\"]}')
-  sys.exit(errors)
-"
-  
+          python3 Tools/ci/validate_asmdefs.py
+
   glb-validation:
     name: GLB Model Validation
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
-      
+
       - name: Install dependencies
         run: |
           pip install pygltflib trimesh numpy
-      
+
       - name: Validate GLB models
         run: |
-          python3 -c "
-import pygltflib
-import trimesh
-import os
-
-models = {
-    'UnityProject/Assets/JohnWickArsenal/Models/Pistols/TTI_PitViper.glb': {'max_tris': 20000, 'source': 'petroulacl'},
-    'UnityProject/Assets/JohnWickArsenal/Models/Pistols/Glock_34.glb': {'max_tris': 20000, 'source': 'petroulacl'},
-    'UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/AR15_AssaultRifle.glb': {'max_tris': 20000, 'source': 'vinish'},
-    'UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/AWP_SniperRifle.glb': {'max_tris': 20000, 'source': 'vinish'},
-    'UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/MP5_SubmachineGun.glb': {'max_tris': 20000, 'source': 'vinish'},
-    'UnityProject/Assets/JohnWickArsenal/Models/DisplayModels/VinishWeapons/Remington870_PumpShotgun.glb': {'max_tris': 20000, 'source': 'vinish'},
-  }
-
-for path, spec in models.items():
-    if not os.path.exists(path):
-        print(f'❌ MISSING: {path}')
-        continue
-    gltf = pygltflib.GLTF2().load_binary(path)
-    scene = trimesh.load(path, force='scene')
-    tris = sum(len(g.faces) for g in scene.geometry.values() if hasattr(g, 'faces'))
-    has_textures = len(gltf.images) > 0
-    print(f'✅ {os.path.basename(path)}: {tris} tris, {len(gltf.meshes)} meshes, {len(gltf.materials)} mats, embedded tex: {has_textures}')
-    if tris > spec['max_tris']:
-        print(f'  ⚠️ Exceeds {spec[\"max_tris\"]} tris limit')
-  print('✅ All GLB models validated')
-"
+          python3 Tools/ci/validate_glb.py
