@@ -1,6 +1,6 @@
 # John Wick Arsenal - Development Progress
 
-**Last Updated:** 2026-11-21
+**Last Updated:** 2026-11-23
 **Target:** B&S Nomad 1.3.1 | Unity 2022.3 LTS | Meta Quest (ARM64)
 
 ---
@@ -23,16 +23,20 @@
 - [x] **All 25 OBJ models + 25 MTL materials copied to UnityProject/Assets/JohnWickArsenal/Models/**
 - [x] **GitHub Actions workflow configured** - Uses official unityci/editor:2022.3.20f1-android-4 Docker image
 - [x] **Unity license activation configured** - Activates when UNITY_USERNAME/UNITY_PASSWORD secrets are set
+- [x] **Local Android build pipeline created** - Tools/build_local.py, Tools/validate_android_sources.py
+- [x] **Unity batch exporter created** - JwaLocalAndroidBuild.cs exports cosmetic models to AssetBundle
+- [x] **Texture import automation created** - JwaCosmeticTextureImport.cs configures textures for Android (1024 max, ASTC_6x6)
+- [x] **Build documentation created** - BUILD_LOCAL.md with prerequisites, validation, and build steps
+- [x] **Source validation passes** - validate_android_sources.py confirms all source files are valid
 
 ---
 
 ## Current Status
 
 ### Blockers
-- **Unity Editor 2022.3 LTS not installed locally** - Cannot build AssetBundles or compile DLL locally
+- **Unity Editor 2022.3 LTS not installed locally** - Cannot build AssetBundles or compile DLL locally (pipeline ready, just needs Unity installed)
 - **Unity Hub flatpak requires GUI** - Cannot run headless in current environment
 - **GitHub Actions Unity License not configured** - CI build requires UNITY_USERNAME, UNITY_PASSWORD, UNITY_SERIAL secrets
-- **Workaround**: Create all 3D assets with Blender/Python, prepare Unity project for remote CI/CD build
 
 ### In Progress
 - [x] Convert OBJ models to FBX for Unity (or configure Unity to import OBJ) - **Unity imports OBJ natively**
@@ -41,6 +45,7 @@
 - [x] Create Unity Editor script for automated prefab creation from generated models
 - [x] **GitHub Actions workflow ready** - Uses official Unity Docker image
 - [x] **Fixed workflow `if:` condition** - Added secrets to workflow-level env
+- [x] **Local Android cosmetic build pipeline complete** - Ready for use when Unity is installed locally
 - [ ] Configure GitHub Secrets for Unity license activation (UNITY_LICENSE required)
 - [ ] Download built AssetBundle and DLL from artifacts
 - [ ] Package final mod ZIP
@@ -173,6 +178,51 @@
 - Runs Auto Prefab Creator to generate prefabs from OBJ models
 - Builds Android AssetBundle using Addressables pipeline
 - Packages mod ZIP with mod.json, icon.png, DLL, bundle, README
+
+---
+
+## Local Android Cosmetic Build Pipeline
+
+### Overview
+Local build pipeline for Android cosmetic review bundles using Unity Personal. Requires Unity 2022.3.20f1 installed via Unity Hub with Android Build Support and an activated Personal license.
+
+### Files
+| File | Purpose |
+|------|---------|
+| `Tools/build_local.py` | Main build orchestrator - finds Unity, validates Android modules, runs batch export |
+| `Tools/validate_android_sources.py` | Pre-build validation (no Unity required) |
+| `UnityProject/Assets/LocalTools/Editor/JwaLocalAndroidBuild.cs` | Unity batch exporter - builds AssetBundle with cosmetic models |
+| `UnityProject/Assets/LocalTools/Editor/JwaCosmeticTextureImport.cs` | Auto-configures cosmetic textures for Android (1024 max, ASTC_6x6) |
+| `BUILD_LOCAL.md` | Complete build instructions |
+
+### Prerequisites
+- Unity 2022.3.20f1 via Unity Hub
+- Android Build Support modules: Android SDK & NDK Tools, OpenJDK
+- Unity Personal license activated in Hub (GUI required)
+
+### Validation (No Unity Required)
+```bash
+python3 Tools/validate_android_sources.py
+```
+Checks: ProjectVersion.txt pins 2022.3.20f1 (61c2feb0970d), package manifests valid, mod.json/ModConfig/*.json valid, all .asmdef files valid JSON, build_local.py and JwaLocalAndroidBuild.cs exist.
+
+### Check Unity Installation
+```bash
+python3 Tools/build_local.py --check
+```
+Verifies Unity 2022.3.20f1 found in Hub locations and Android Build Support modules present.
+
+### Build Cosmetic Review Bundle
+```bash
+python3 Tools/build_local.py --output BuildOutput
+```
+Launches Unity in batch mode, switches to Android target, runs `JwaLocalAndroidBuild.ExportBatch()`, exports to `BuildOutput/cosmetics-android-<timestamp>/johnwickarsenal-cosmetics.bundle`.
+
+### Bundle Contents
+Models from:
+- `Assets/JohnWickArsenal/Models/Suits/` (5 suits)
+- `Assets/JohnWickArsenal/Models/Cosmetics/Garments/` (2 cosmetic garments)
+- `Assets/JohnWickArsenal/Models/Cosmetics/Props/` (1 prop - Briefcase)
 
 ---
 

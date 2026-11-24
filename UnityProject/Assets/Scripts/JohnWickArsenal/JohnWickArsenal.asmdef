@@ -13,5 +13,7 @@
   "overrideReferences": false,
   "precompiledReferences": [],
   "autoReferenced": true,
-  "defineConstraints": []
+  "defineConstraints": [
+    "JWA_LEGACY_PROTOTYPE"
+  ]
 }

@@ -1,12 +1,9 @@
-# Blender 4.3.2 MTL File: 'None'
-# www.blender.org
-
+# MakeHuman Suits 01, by Margaret Toigo, CC0 1.0
 newmtl ClassicBlackSuit_Wool
-Ns 22.499992
-Ka 1.000000 1.000000 1.000000
-Kd 0.050000 0.050000 0.060000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.500000
-d 1.000000
+Ka 1.0 1.0 1.0
+Kd 1.0 1.0 1.0
+Ks 0.1 0.1 0.1
+Ns 12.0
+d 1.0
 illum 2
+map_Kd ClassicBlackSuit_Albedo.png
