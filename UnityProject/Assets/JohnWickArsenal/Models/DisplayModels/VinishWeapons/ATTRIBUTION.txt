@@ -1,0 +1,67 @@
+# Vinish.dev Weapons - Stand-in Display Models Attribution
+
+## Source
+**Creator:** vinish.dev  
+**Website:** https://vinish.dev/free-3d-models/weapons/  
+**Download:** https://models.vinish.dev/weapons/weapons.zip  
+**License:** CC BY 4.0 (Creative Commons Attribution 4.0 International)
+
+## License Terms (CC BY 4.0)
+- ✅ Commercial use permitted
+- ✅ Modification permitted
+- ✅ Redistribution permitted
+- ⚠️ **Attribution required** — Must give appropriate credit
+
+## Attribution Required
+If you use these models, include this credit:
+
+```
+"Weapons" by vinish.dev (https://vinish.dev/free-3d-models/weapons/), CC BY 4.0
+```
+
+Or individual model credits:
+
+| Stand-in Model | Original Vinish Model | Credit Line |
+|----------------|----------------------|-------------|
+| AR15_AssaultRifle.glb | Assault Rifle | "Assault Rifle" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0 |
+| AWP_SniperRifle.glb | Sniper Rifle | "Sniper Rifle" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0 |
+| MP5_SubmachineGun.glb | Submachine Gun | "Submachine Gun" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0 |
+| Remington870_PumpShotgun.glb | Pump Shotgun | "Pump Shotgun" by vinish.dev (https://vinish.dev/free-3d-models/), CC BY 4.0 |
+
+## Model Details (from Vinish.dev)
+
+### Assault Rifle (AR-15 stand-in)
+- Triangles: 13,447
+- Size: 0.05 x 0.88 x 0.33 m
+- Nodes: Rifle, Magazine, Charging_Handle
+- PBR textures packed in GLB
+
+### Sniper Rifle (AWP stand-in)
+- Triangles: 8,564
+- Size: 0.09 x 1.33 x 0.28 m
+- Nodes: Rifle, Bolt, Scope, Bipod
+- PBR textures packed in GLB
+
+### Submachine Gun (MP5 stand-in)
+- Triangles: 6,532
+- Size: 0.05 x 0.70 x 0.25 m
+- Nodes: SMG, Magazine, Charging_Handle
+- PBR textures packed in GLB
+
+### Pump Shotgun (Remington 870 stand-in)
+- Triangles: 3,726
+- Size: 0.05 x 1.03 x 0.15 m
+- Nodes: Shotgun, Pump
+- PBR textures packed in GLB
+
+## Important Notes
+1. These are **generic models**, not exact replicas of AR-15, AWP, MP5, or Remington 870
+2. They are visually similar and suitable for cosmetic display purposes
+3. For exact real-world models, user must provide Sketchfab URLs
+4. Textures are embedded in GLB files (no separate texture files needed)
+5. Models use +Y up, front faces +Z, origin on ground
+
+## Quest Optimization
+- All models under 15K triangles (well under Quest limits)
+- GLB format with embedded PBR textures
+- Ready for glTFast import in Unity
