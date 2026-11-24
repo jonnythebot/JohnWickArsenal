@@ -9,8 +9,10 @@ Source: https://static.makehumancommunity.org/assets/assetpacks/suits01.html
 License: https://creativecommons.org/publicdomain/zero/1.0/
 
 Briefcase.fbx adapts the BriefCase model and textures from Cases by
-loafbrr_1. This project re-exports the model with relative 1K albedo and
-normal texture paths. The original assets are licensed under CC0 1.0.
+loafbrr_1. This project combines the case pieces into one upright mesh
+with a carry-handle marker, preserves relative 1K albedo and normal texture
+paths, and includes an icon rendered from the adapted model. The original
+assets are licensed under CC0 1.0.
 Source: https://opengameart.org/content/cases
 License: https://creativecommons.org/publicdomain/zero/1.0/
 
@@ -30,7 +32,8 @@ DoubleBreastedSuit: new static wardrobe-authoring source, 10,062 triangles,
 1K albedo and tangent-space normal maps.
 DinnerJacket: new static wardrobe-authoring source, 15,300 triangles,
 1K albedo and tangent-space normal maps.
-Briefcase: new static cosmetic prop, 712 triangles, 1K albedo and normal maps.
+The briefcase has 712 triangles, one render mesh, and a single material.
+JwaCosmeticGrip marks the carry handle.
 
 The OBJ materials reference albedo. Normal and height maps accompany
 the OBJ files as authoring inputs. The briefcase FBX references both maps.

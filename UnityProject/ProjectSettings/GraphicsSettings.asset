@@ -1,12 +1,12 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!97 &1
+--- !u!30 &1
 GraphicsSettings:
   m_ObjectHideFlags: 0
   m_DefaultRenderingPipeline: {fileID: 0}
   m_CustomRenderPipeline: {fileID: 0}
   m_TransparencySortMode: 0
-  m_TransparencySortAxis: 0, 0, 1
+  m_TransparencySortAxis: {x: 0, y: 0, z: 1}
   m_DefaultRenderingPipelinePath:
   m_CustomRenderPipelinePath:
   m_TierSettings:
