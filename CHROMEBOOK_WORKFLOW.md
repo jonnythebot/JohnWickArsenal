@@ -79,7 +79,7 @@ This document explains what can be verified from a Chromebook (Linux environment
 ### ⚠️ Known Issues (Chromebook-detectable)
 | Issue | Severity |
 |-------|----------|
-| Manifest missing `com.unity.cloud.gltfast` | Warning |
+| Manifest missing `com.unity.gltfast` | Warning |
 | petroulacl models lack embedded textures | Info (expected) |
 | `.mtl` file flagged as unusual texture format | Warning (false positive) |
 
@@ -157,7 +157,7 @@ The following workflows run automatically on push/PR:
 1. Install Unity 2022.3.20f1 via Unity Hub
 2. Add Android Build Support + SDK/NDK/OpenJDK modules
 3. Open UnityProject in Hub
-4. Window → Package Manager → Install glTFast (com.unity.cloud.gltfast 6.3.2)
+4. Window → Package Manager → Install glTFast (com.unity.gltfast 6.3.2)
 5. Edit → Project Settings → Player → Scripting Define Symbols → Add "JWA_COSMETIC_ONLY"
 6. Tools → John Wick Arsenal → Generate Display Prefabs
 # If 6 prefabs created → TIER 1 TEST PASSED

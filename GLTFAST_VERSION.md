@@ -4,7 +4,7 @@
 
 | Detail | Value |
 |--------|-------|
-| **Package ID** | `com.unity.cloud.gltfast` |
+| **Package ID** | `com.unity.gltfast` |
 | **Display Name** | glTFast |
 | **Unity Registry URL** | `https://packages.unity.com` |
 | **Unity Version** | 2022.3 LTS (including 2022.3.20f1) |
@@ -14,20 +14,16 @@
 | glTFast Version | Unity 2022.3 LTS | Notes |
 |-----------------|------------------|-------|
 | 5.x.x | ✅ Compatible | Legacy support |
-| **6.0.0 - 6.3.x** | ✅ **Recommended** | Current stable |
+| **6.0.0 - 6.3.x** | ✅ **Recommended** | Current stable for 2022.3+ |
+| **6.3.2** | ✅ **Verified** | Latest 6.3.x for 2022.3 LTS |
 | 6.4.x+ | ⚠️ Check changelog | May require Unity 6+ |
-
-## Verified Working Version
-- **6.3.0** - Confirmed compatible with Unity 2022.3 LTS
-- **6.3.1** - Confirmed compatible
-- **6.3.2** - Latest as of 2024, compatible
 
 ## Installation Instructions (Unity Editor)
 1. Open Unity Project
 2. Window → Package Manager
 3. Select "Unity Registry" from dropdown
 4. Search "glTFast"
-5. Select version **6.3.x** (latest 6.3.x)
+5. Select version **6.3.2** (latest 6.3.x)
 5. Click **Install**
 
 ## Package Features Used by JWA_DisplayPrefabGenerator
@@ -38,7 +34,6 @@
 | Embedded PBR Textures | ✅ Auto-extracted |
 | Mesh Import | ✅ Standard Unity Mesh |
 | Material Creation | ✅ URP/Built-in RP |
-| Animation Import | ✅ (if needed) |
 
 ## Version Verification Commands
 
@@ -47,7 +42,7 @@
 # Window > Package Manager > Installed Packages > glTFast
 
 # Or via manifest.json:
-"com.unity.cloud.gltfast": "6.3.2"
+"com.unity.gltfast": "6.3.2"
 ```
 
 ## Known Issues / Limitations

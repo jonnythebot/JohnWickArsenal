@@ -189,8 +189,8 @@ def validate_manifest(path: Path) -> Tuple[List[str], List[str]]:
                 warnings.append(f"Manifest missing recommended dependency: {req}")
         
         # Check for glTFast (required for GLB import)
-        if "com.unity.cloud.gltfast" not in deps:
-            warnings.append("Manifest missing glTFast (com.unity.cloud.gltfast) - required for GLB import")
+        if "com.unity.gltfast" not in deps:
+            warnings.append("Manifest missing glTFast (com.unity.gltfast) - required for GLB import")
         
     except json.JSONDecodeError as e:
         errors.append(f"Invalid JSON in manifest: {e}")

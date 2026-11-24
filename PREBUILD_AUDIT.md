@@ -86,7 +86,7 @@
 ### glTFast Package Information
 | Detail | Value |
 |--------|-------|
-| **Package ID** | `com.unity.cloud.gltfast` |
+| **Package ID** | `com.unity.gltfast` |
 | **Unity Registry** | https://packages.unity.com |
 | **Compatible Version** | **6.3.0 - 6.3.2** (for Unity 2022.3 LTS) |
 | **Latest Verified** | **6.3.2** |
@@ -173,7 +173,7 @@
 
 | Package | Tier 1 Cosmetic Test | Tier 2 Bundle Build | Tier 3 Android Build | Tier 4 Full Mod | Notes |
 |---------|---------------------|---------------------|---------------------|-----------------|-------|
-| `com.unity.cloud.gltfast` | **✅ REQUIRED** | ✅ REQUIRED | ✅ REQUIRED | ✅ REQUIRED | GLB import |
+| `com.unity.gltfast` | **✅ REQUIRED** | ✅ REQUIRED | ✅ REQUIRED | ✅ REQUIRED | GLB import |
 | `com.unity.modules.assetbundle` | Optional | ✅ REQUIRED | ✅ REQUIRED | ✅ REQUIRED | Built-in module |
 | `com.unity.addressables` | Optional | ✅ REQUIRED | ✅ REQUIRED | ✅ REQUIRED | AssetBundle |
 | `com.unity.xr.management` | **Not needed** | **Not needed** | ✅ REQUIRED | ✅ REQUIRED | XR core |
@@ -185,7 +185,7 @@
 ```json
 {
   "dependencies": {
-    "com.unity.cloud.gltfast": "6.3.2",
+    "com.unity.gltfast": "6.3.2",
     "com.unity.modules.assetbundle": "1.0.0"
   }
 }
@@ -250,14 +250,14 @@ All B&S references in legacy editor scripts wrapped in `#if !JWA_COSMETIC_ONLY`:
 
 ### Prerequisites (Must Complete Before Test)
 - [ ] Unity 2022.3.20f1 installed via Unity Hub
-- [ ] **glTFast 6.3.2** installed via Package Manager (`com.unity.cloud.gltfast`)
+- [ ] **glTFast 6.3.2** installed via Package Manager (`com.unity.gltfast`)
 - [ ] `JWA_COSMETIC_ONLY` added to **Scripting Define Symbols** in Player Settings
 - [ ] `UnityProject` opened in Unity Hub
 
 ### Test Procedure
 ```bash
 # In Unity Editor:
-1. Window > Package Manager > Install glTFast (com.unity.cloud.gltfast 6.3.2)
+1. Window > Package Manager > Install glTFast (com.unity.gltfast 6.3.2)
 2. Edit > Project Settings > Player > Scripting Define Symbols > Add "JWA_COSMETIC_ONLY"
 3. Tools > John Wick Arsenal > Generate Display Prefabs
 ```
@@ -337,7 +337,7 @@ Generated 6 display prefabs!
 # On target machine:
 1. Install Unity 2022.3.20f1 via Hub
 2. Open UnityProject
-3. Window → Package Manager → Install glTFast (com.unity.cloud.gltfast 6.3.2)
+3. Window → Package Manager → Install glTFast (com.unity.gltfast 6.3.2)
 4. Edit → Project Settings → Player → Scripting Define Symbols → Add "JWA_COSMETIC_ONLY"
 5. Tools → John Wick Arsenal → Generate Display Prefabs
 # If 6 prefabs created → COSMETIC TEST PASSED
@@ -350,7 +350,7 @@ Generated 6 display prefabs!
 ## Remaining Blocker for Tier 1 Test
 | Blocker | Resolution |
 |---------|------------|
-| **glTFast package** | Install `com.unity.cloud.gltfast` 6.3.2 in Unity Package Manager |
+| **glTFast package** | Install `com.unity.gltfast` 6.3.2 in Unity Package Manager |
 | **Scripting Define** | Add `JWA_COSMETIC_ONLY` to Player Settings → Scripting Define Symbols |
 
 **That's it.** Once these two steps are done, the 6 GLB models + ClassicBlackSuit can be imported and previewed.
@@ -363,7 +363,7 @@ Generated 6 display prefabs!
 
 | Item | Status | Details |
 |------|--------|---------|
-| glTFast in manifest | ✅ Added | `com.unity.cloud.gltfast`: "6.3.2" |
+| glTFast in manifest | ✅ Added | `com.unity.gltfast`: "6.3.2" |
 | Cosmetic-only define | ✅ Configured | `JWA_COSMETIC_ONLY` in cloud build config |
 | Gameplay scripts excluded | ✅ Configured | Main assembly excluded via cloud build config |
 | Preview scene | ✅ Created | `JWA_CosmeticPreviewSceneSetup.cs` |
@@ -382,7 +382,7 @@ Generated 6 display prefabs!
 
 | Requirement | Status |
 |-------------|--------|
-| glTFast in manifest | ✅ Added (`com.unity.cloud.gltfast`: "6.3.2") |
+| glTFast in manifest | ✅ Added (`com.unity.gltfast`: "6.3.2") |
 | Cosmetic-only define | ✅ `JWA_COSMETIC_ONLY` in cloud build config |
 | Gameplay assemblies excluded | ✅ Main assembly excluded in cloud config |
 | Cosmetic asmdef isolated | ✅ No B&S references |
