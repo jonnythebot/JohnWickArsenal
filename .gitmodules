@@ -1,0 +1,3 @@
+[submodule "AssetDownloads/fps_kit"]
+	path = AssetDownloads/fps_kit
+	url = https://github.com/petroulacl/fps-asset-kit.git

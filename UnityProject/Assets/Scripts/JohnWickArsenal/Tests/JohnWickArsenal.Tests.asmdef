@@ -1,9 +1,7 @@
 {
   "name": "JohnWickArsenal.Tests",
   "references": [
-    "JohnWickArsenal",
-    "UnityEngine.TestRunner",
-    "UnityEngine.CoreModule"
+    "JohnWickArsenal"
   ],
   "includePlatforms": [
     "Editor"
@@ -12,6 +10,8 @@
   "allowUnsafeCode": false,
   "overrideReferences": false,
   "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": []
+  "autoReferenced": false,
+  "defineConstraints": [
+    "JWA_LEGACY_PROTOTYPE"
+  ]
 }

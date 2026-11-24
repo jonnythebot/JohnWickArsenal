@@ -1,5 +1,7 @@
 # John Wick Arsenal
 
+> **Current development workflow:** Open `UnityProject` in Unity 2022.3.20f1 through Unity Hub. See the [local build guide](BUILD_SYSTEM.md) for Android export, license setup, and the remaining Nomad SDK work.
+
 A comprehensive Blade & Sorcery Nomad mod featuring John Wick's most iconic weapons from the film series.
 
 ## Weapons Included
