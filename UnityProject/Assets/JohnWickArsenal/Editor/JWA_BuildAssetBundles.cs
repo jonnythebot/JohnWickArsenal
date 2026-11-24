@@ -104,82 +104,47 @@ public class JWA_BuildAssetBundles : EditorWindow
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Build Actions", EditorStyles.boldLabel);
 
-        GUI.enabled = !isBuilding && !EditorApplication.isCompiling;
-
-        if (GUILayout.Button(isBuilding ? "⏳ Building..." : "🔨 Build AssetBundle", GUILayout.Height(50)))
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Build Bundle", GUILayout.Height(40)))
         {
             BuildBundle();
         }
-
-        EditorGUILayout.Space(5);
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("✅ Validate Prefabs"))
+        if (GUILayout.Button("Validate Prefabs", GUILayout.Height(40)))
         {
-            ValidateAllPrefabs();
-        }
-        if (GUILayout.Button("📦 Copy to Mod Folder"))
-        {
-            CopyBundleToModFolder();
+            ValidatePrefabs();
         }
         EditorGUILayout.EndHorizontal();
 
+        EditorGUILayout.Space(5);
         EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("🧹 Clean Build Folder"))
+        if (GUILayout.Button("Clean Build Folder"))
         {
             CleanBuildFolder();
         }
-        if (GUILayout.Button("📋 Open Mod Folder"))
+        if (GUILayout.Button("Open Build Folder"))
         {
-            OpenModFolder();
+            UnityEditor.EditorUtility.RevealInFinder(GetBuildOutputPath());
         }
         EditorGUILayout.EndHorizontal();
 
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("📊 Generate Build Report"))
-        {
-            GenerateBuildReport();
-        }
-        if (GUILayout.Button("🔍 Verify Bundle Contents"))
-        {
-            VerifyBundleContents();
-        }
-        EditorGUILayout.EndHorizontal();
-
-        GUI.enabled = true;
         EditorGUILayout.EndVertical();
     }
 
     private void DrawLastBuildInfo()
     {
-        if (lastReport != null)
-        {
-            EditorGUILayout.BeginVertical("box");
-            EditorGUILayout.LabelField("Last Build Report", EditorStyles.boldLabel);
+        if (lastReport == null) return;
 
-            var summary = lastReport.summary;
-            EditorGUILayout.LabelField($"Status: {summary.result}", summary.result == BuildResult.Succeeded ? EditorStyles.boldLabel : EditorStyles.label);
-            EditorGUILayout.LabelField($"Time: {summary.totalTime}", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField($"Size: {FormatBytes(summary.totalSize)}", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField($"Assets: {summary.totalAssets}", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField($"Warnings: {summary.totalWarnings}", EditorStyles.miniLabel);
-            EditorGUILayout.LabelField($"Errors: {summary.totalErrors}", EditorStyles.miniLabel);
+        EditorGUILayout.BeginVertical("box");
+        EditorGUILayout.LabelField("Last Build Report", EditorStyles.boldLabel);
 
-            if (lastReport.steps != null && lastReport.steps.Length > 0)
-            {
-                EditorGUILayout.LabelField("Steps:", EditorStyles.boldLabel);
-                foreach (var step in lastReport.steps)
-                {
-                    EditorGUILayout.LabelField($"  {step.name}: {step.duration}", EditorStyles.miniLabel);
-                }
-            }
+        var color = lastReport.summary.result == BuildResult.Succeeded ? "green" : "red";
+        EditorGUILayout.LabelField($"Result: <color={color}>{lastReport.summary.result}</color>");
+        EditorGUILayout.LabelField($"Time: {lastReport.summary.totalTime}");
+        EditorGUILayout.LabelField($"Size: {FormatBytes(lastReport.summary.totalSize)}");
+        EditorGUILayout.LabelField($"Assets: {lastReport.summary.totalAssets}");
+        EditorGUILayout.LabelField($"Output: {lastReport.summary.outputPath}");
 
-            if (GUILayout.Button("Clear Report"))
-            {
-                lastReport = null;
-            }
-            EditorGUILayout.EndVertical();
-        }
+        EditorGUILayout.EndVertical();
     }
 
     private void DrawBuildLog()
@@ -187,64 +152,84 @@ public class JWA_BuildAssetBundles : EditorWindow
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Build Log", EditorStyles.boldLabel);
 
-        var logStyle = new GUIStyle(EditorStyles.textArea)
-        {
-            fontSize = 10,
-            wordWrap = true,
-            richText = true
-        };
+        var logRect = EditorGUILayout.GetControlRect(false, 200);
+        EditorGUI.TextArea(logRect, buildLog.ToString());
 
-        EditorGUILayout.TextArea(buildLog.ToString(), logStyle, GUILayout.MinHeight(150), GUILayout.ExpandHeight(true));
-
-        EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Clear Log"))
         {
             buildLog.Clear();
         }
-        if (GUILayout.Button("Save Log"))
-        {
-            SaveBuildLog();
-        }
-        if (GUILayout.Button("Copy Log"))
-        {
-            EditorGUIUtility.systemCopyBuffer = buildLog.ToString();
-        }
-        EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.EndVertical();
     }
 
-    // ========================================================================
-    // BUILD IMPLEMENTATION
-    // ========================================================================
-
-    public static BuildReport BuildBundle()
+    public static void BuildBundle()
     {
         var window = GetWindow<JWA_BuildAssetBundles>();
-        window.buildLog.Clear();
-        window.LogBuild("=== AssetBundle Build Started ===");
-        window.LogBuild($"Time: {DateTime.Now}");
-        window.LogBuild($"Unity: {Application.unityVersion}");
-        window.LogBuild($"Platform: {TARGET_PLATFORM}");
-        window.LogBuild("");
+        window.BuildBundleInternal();
+    }
+
+    private void BuildBundleInternal()
+    {
+        buildLog.Clear();
+        isBuilding = true;
+        LogBuild("=== AssetBundle Build Started ===");
+        LogBuild($"Time: {DateTime.Now}");
+        LogBuild($"Unity: {Application.unityVersion}");
+        LogBuild($"Platform: {TARGET_PLATFORM}");
+        LogBuild($"Compression: {COMPRESSION}");
+        LogBuild($"Bundle Name: {BUNDLE_NAME}");
+        LogBuild("");
 
         try
         {
-            var report = window.ExecuteBuild();
-            window.lastReport = report;
-            return report;
+            var report = ExecuteBuildInternal();
+
+            if (report == null || report.summary.result != BuildResult.Succeeded)
+            {
+                LogBuild("<color=red>BUILD FAILED</color>");
+                lastReport = report;
+                return;
+            }
+
+            var bundlePath = GetBundleOutputPath();
+            var fileInfo = new FileInfo(bundlePath);
+
+            LogBuild("");
+            LogBuild($"<color=green>✅ BUILD SUCCESSFUL</color>");
+            LogBuild($"Time: {report.summary.totalTime}");
+            LogBuild($"Size: {FormatBytes(fileInfo.Length)}");
+            LogBuild($"Assets: {report.summary.totalAssets}");
+            LogBuild($"Output: {bundlePath}");
+
+            // Post-build validation
+            if (validateAfterBuild)
+            {
+                ValidateBuiltBundle(bundlePath);
+            }
+
+            // Copy to mod folder
+            if (copyToModFolder)
+            {
+                CopyBundleToModFolder();
+            }
+
+            LogBuild("=== AssetBundle Build Complete ===");
+            lastReport = report;
         }
         catch (Exception e)
         {
-            window.LogBuild($"<color=red>FATAL ERROR: {e.Message}</color>");
-            window.LogBuild(e.StackTrace);
-            return null;
+            LogBuild($"<color=red>FATAL ERROR: {e.Message}</color>");
+            LogBuild(e.StackTrace);
+        }
+        finally
+        {
+            isBuilding = false;
         }
     }
 
-    private BuildReport ExecuteBuild()
+    private BuildReport ExecuteBuildInternal()
     {
-        isBuilding = true;
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         try
@@ -297,39 +282,14 @@ public class JWA_BuildAssetBundles : EditorWindow
             }
 
             sw.Stop();
-
-            if (report == null || report.summary.result != BuildResult.Succeeded)
-            {
-                throw new Exception("Build failed - check log for details");
-            }
-
-            var bundlePath = GetBundleOutputPath();
-            var fileInfo = new FileInfo(bundlePath);
-
-            LogBuild("");
-            LogBuild($"<color=green>✅ BUILD SUCCESSFUL</color>");
-            LogBuild($"Time: {sw.Elapsed}");
-            LogBuild($"Size: {FormatBytes(fileInfo.Length)}");
-            LogBuild($"Assets: {validPaths.Count}");
-            LogBuild($"Output: {bundlePath}");
-
-            // Post-build validation
-            if (validateAfterBuild)
-            {
-                ValidateBuiltBundle(bundlePath);
-            }
-
-            // Copy to mod folder
-            if (copyToModFolder)
-            {
-                CopyBundleToModFolder();
-            }
+            report.summary.totalTime = sw.Elapsed;
 
             return report;
         }
-        finally
+        catch (Exception e)
         {
-            isBuilding = false;
+            LogBuild($"<color=red>Build error: {e.Message}</color>");
+            throw;
         }
     }
 
@@ -419,7 +379,7 @@ public class JWA_BuildAssetBundles : EditorWindow
             summary = new BuildSummary
             {
                 result = manifest != null ? BuildResult.Succeeded : BuildResult.Failed,
-                totalTime = TimeSpan.Zero, // Legacy doesn't report time
+                totalTime = TimeSpan.Zero,
                 totalSize = GetBundleSize(),
                 totalAssets = prefabPaths.Count,
                 outputPath = GetBundleOutputPath()
@@ -480,38 +440,32 @@ public class JWA_BuildAssetBundles : EditorWindow
         }
     }
 
-    private string GetBuildOutputPath()
+    private static string GetBuildOutputPath()
     {
         return Path.Combine(Application.dataPath, "..", "AssetBundles", "Android");
     }
 
-    private string GetModOutputPath()
+    private static string GetModOutputPath()
     {
         return Path.Combine(Application.dataPath, "..", "..", "AssetBundles");
     }
 
-    private string GetBundleOutputPath()
+    private static string GetBundleOutputPath()
     {
         return Path.Combine(GetBuildOutputPath(), BUNDLE_NAME);
     }
 
-    private long GetBundleSize()
+    private static long GetBundleSize()
     {
         var path = GetBundleOutputPath();
         return File.Exists(path) ? new FileInfo(path).Length : 0;
     }
 
-    private string GetAddressableAddress(string assetPath)
+    private static string GetAddressableAddress(string assetPath)
     {
-        // Convert Assets/JohnWickArsenal/Resources/Weapons/Pistols/jwa_hk_p30l.prefab
-        // to jwa_hk_p30l
         var fileName = Path.GetFileNameWithoutExtension(assetPath);
         return fileName;
     }
-
-    // ========================================================================
-    // UTILITY METHODS
-    // ========================================================================
 
     private void CleanBuildFolder()
     {
@@ -541,77 +495,6 @@ public class JWA_BuildAssetBundles : EditorWindow
         LogBuild($"<color=green>✅ Copied to mod folder: {destPath} ({FormatBytes(fileInfo.Length)})</color>");
     }
 
-    private void OpenModFolder()
-    {
-        var modRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..", ".."));
-        EditorUtility.RevealInFinder(modRoot);
-    }
-
-    private void ValidateAllPrefabs()
-    {
-        LogBuild("Validating all prefabs...");
-        var validator = new PrefabValidator();
-        var guids = AssetDatabase.FindAssets("t:Prefab", new[] { RESOURCES_PATH });
-
-        int valid = 0, invalid = 0;
-        foreach (var guid in guids)
-        {
-            var path = AssetDatabase.GUIDToAssetPath(guid);
-            if (validator.ValidatePrefab(path, LogBuild))
-                valid++;
-            else
-                invalid++;
-        }
-
-        LogBuild($"Validation complete: {valid} valid, {invalid} invalid");
-    }
-
-    private void VerifyBundleContents()
-    {
-        var bundlePath = GetBundleOutputPath();
-        if (!File.Exists(bundlePath))
-        {
-            LogBuild("<color=red>Bundle not found. Build first.</color>");
-            return;
-        }
-
-        ValidateBuiltBundle(bundlePath);
-    }
-
-    private void GenerateBuildReport()
-    {
-        var reportPath = Path.Combine(Application.dataPath, "..", "BuildReport.txt");
-        var sb = new StringBuilder();
-
-        sb.AppendLine("JOHN WICK ARSENAL - BUILD REPORT");
-        sb.AppendLine($"Generated: {DateTime.Now}");
-        sb.AppendLine($"Unity: {Application.unityVersion}");
-        sb.AppendLine($"Platform: {TARGET_PLATFORM}");
-        sb.AppendLine("");
-
-        if (lastReport != null)
-        {
-            sb.AppendLine($"Status: {lastReport.summary.result}");
-            sb.AppendLine($"Time: {lastReport.summary.totalTime}");
-            sb.AppendLine($"Size: {FormatBytes(lastReport.summary.totalSize)}");
-            sb.AppendLine($"Assets: {lastReport.summary.totalAssets}");
-        }
-
-        sb.AppendLine("");
-        sb.AppendLine("BUILD LOG:");
-        sb.AppendLine(buildLog.ToString());
-
-        File.WriteAllText(reportPath, sb.ToString());
-        LogBuild($"<color=green>Report saved: {reportPath}</color>");
-    }
-
-    private void SaveBuildLog()
-    {
-        var logPath = Path.Combine(Application.dataPath, "..", "build_log.txt");
-        File.WriteAllText(logPath, buildLog.ToString());
-        LogBuild($"<color=green>Log saved: {logPath}</color>");
-    }
-
     private void LogBuild(string message)
     {
         buildLog.AppendLine(message);
@@ -619,7 +502,7 @@ public class JWA_BuildAssetBundles : EditorWindow
         Repaint();
     }
 
-    private string FormatBytes(long bytes)
+    private static string FormatBytes(long bytes)
     {
         string[] suffixes = { "B", "KB", "MB", "GB" };
         int i = 0;
@@ -686,6 +569,7 @@ public class JWA_BuildAssetBundles : EditorWindow
             }
 
             // Check for required components using reflection
+#if !JWA_COSMETIC_ONLY
             var asm = Assembly.GetAssembly(typeof(Weapon));
             if (asm != null)
             {
@@ -709,6 +593,9 @@ public class JWA_BuildAssetBundles : EditorWindow
                     if (prefab.GetComponentInChildren(magazineType) == null) { logCallback?.Invoke($"⚠ {prefab.name}: Missing Magazine"); hasErrors = true; }
                 }
             }
+#else
+            logCallback?.Invoke($"ℹ️ {prefab.name}: JWA_COSMETIC_ONLY - B&S component validation skipped.");
+#endif
 
             // Check transforms
             string[] required = { "MuzzlePoint", "EjectionPort", "Grip_L", "Grip_R" };

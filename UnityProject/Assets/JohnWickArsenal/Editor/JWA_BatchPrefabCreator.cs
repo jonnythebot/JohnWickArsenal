@@ -475,6 +475,7 @@ public static class JWA_BatchPrefabCreator
         }
 
         // Add base Weapon/Gun/Throwable component via reflection
+#if !JWA_COSMETIC_ONLY
         var bsAsm = typeof(Weapon).Assembly;
         if (bsAsm != null)
         {
@@ -491,11 +492,14 @@ public static class JWA_BatchPrefabCreator
                     root.AddComponent(gunType);
             }
         }
+#else
+        Debug.Log("[JWA_BatchPrefabCreator] JWA_COSMETIC_ONLY defined - skipping B&S component setup.");
+#endif
     }
 
     private static void AddEquipmentComponents(GameObject root, string type)
     {
-        // Equipment items need Item component
+#if !JWA_COSMETIC_ONLY
         var bsAsm = typeof(Weapon).Assembly;
         if (bsAsm != null)
         {
@@ -503,11 +507,14 @@ public static class JWA_BatchPrefabCreator
             if (itemType != null && root.GetComponent(itemType) == null)
                 root.AddComponent(itemType);
         }
+#else
+        Debug.Log("[JWA_BatchPrefabCreator] JWA_COSMETIC_ONLY defined - skipping B&S equipment components.");
+#endif
     }
 
     private static void AddSuitComponents(GameObject root)
     {
-        // Suits need Item component
+#if !JWA_COSMETIC_ONLY
         var bsAsm = typeof(Weapon).Assembly;
         if (bsAsm != null)
         {
@@ -515,6 +522,9 @@ public static class JWA_BatchPrefabCreator
             if (itemType != null && root.GetComponent(itemType) == null)
                 root.AddComponent(itemType);
         }
+#else
+        Debug.Log("[JWA_BatchPrefabCreator] JWA_COSMETIC_ONLY defined - skipping B&S suit components.");
+#endif
     }
 
     private static void SetupColliders(GameObject root, string weaponType)

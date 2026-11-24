@@ -437,7 +437,8 @@ public static class JWA_BatchBuilder
                 }
             }
 
-            // Check for required components using reflection
+            // Check for required components using reflection (B&S types)
+#if !JWA_COSMETIC_ONLY
             var asm = typeof(Weapon).Assembly;
             if (asm != null)
             {
@@ -461,6 +462,9 @@ public static class JWA_BatchBuilder
                     if (prefab.GetComponentInChildren(magazineType) == null) { logCallback?.Invoke($"⚠ {prefab.name}: Missing Magazine"); hasErrors = true; }
                 }
             }
+#else
+            logCallback?.Invoke($"ℹ️ {prefab.name}: JWA_COSMETIC_ONLY - B&S component validation skipped.");
+#endif
 
             // Check transforms
             string[] required = { "MuzzlePoint", "EjectionPort", "Grip_L", "Grip_R" };
