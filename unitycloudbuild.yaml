@@ -1,0 +1,93 @@
+# Unity Cloud Build Configuration for JohnWickArsenal Cosmetic Preview
+# This file configures Unity Cloud Build for cosmetic-only builds
+
+projectId: "your-project-id"  # Replace with your Unity Cloud project ID
+
+buildTargets:
+  android-cosmetic-preview:
+    platform: android
+    buildScript: "Assets/JohnWickArsenal/Editor/JWA_CloudBuildConfig.cs"
+    preExportMethod: "JohnWickArsenal.Editor.JWA_CloudBuildConfig.PreExport"
+    postExportMethod: "JohnWickArsenal.Editor.JWA_CloudBuildConfig.PostExport"
+    platformSettings:
+      android:
+        minApiLevel: 29
+        targetApiLevel: 33
+        scriptingBackend: IL2CPP
+        architecture: ARM64
+        developmentBuild: false
+        scriptDebugging: false
+        stripEngineCode: true
+        scriptCompilation: Release
+    buildOptions:
+      - development: false
+      - allowDebugging: false
+      - connectWithProfiler: false
+      - scriptsOnly: false
+      - compressTextures: true
+      - compressionFormat: ASTC
+
+# Build configuration for cosmetic-only builds
+buildConfiguration:
+  name: "Cosmetic Preview"
+  description: "Cosmetic-only build for Unity Cloud Build - includes ClassicBlackSuit and 6 display models"
+  defineSymbols:
+    - "JWA_COSMETIC_ONLY"
+  excludedAssemblies:
+    - "JohnWickArsenal"  # Main gameplay assembly (requires B&S SDK)
+    - "JohnWickArsenal.Tests"
+  includedAssemblies:
+    - "JohnWickArsenal.Cosmetic.Editor"
+    - "JohnWickArsenal.Legacy.Pipeline.Editor"
+  scenes:
+    - "Assets/JohnWickArsenal/Scenes/CosmeticPreview.unity"
+  addressables:
+    profile: "cosmetic-preview"
+    groups:
+      - "display-models"
+      - "cosmetic-materials"
+      - "preview-shaders"
+
+# Platform-specific settings
+platforms:
+  android:
+    bundleVersionCode: 1
+    bundleVersion: "1.0.0-preview"
+    companyName: "JohnWickArsenal"
+    productName: "John Wick Arsenal - Cosmetic Preview"
+    defaultOrientation: LandscapeLeft
+    targetArchitectures:
+      - ARM64
+    graphicsAPIs:
+      - OpenGLES3
+      - Vulkan
+    minimumApiLevel: "Android 10.0 (API Level 29)"
+    targetApiLevel: "Android 13 (API Level 33)"
+    scriptingBackend: IL2CPP
+    apiCompatibilityLevel: .NET Standard 2.1
+    managedStrippingLevel: High
+    stripEngineCode: true
+
+# Build pipeline configuration
+pipeline:
+  preBuildSteps:
+    - "Apply cosmetic-only define symbols"
+    - "Disable gameplay assemblies"
+    - "Configure Addressables for cosmetic preview"
+  buildSteps:
+    - "Import and validate GLB models"
+    - "Generate display prefabs"
+    - "Build Addressables content"
+    - "Build AssetBundle for Android"
+    - "Package cosmetic preview"
+  postBuildSteps:
+    - "Upload build artifacts"
+    - "Notify completion"
+
+# Notification settings
+notifications:
+  email:
+    onSuccess: true
+    onFailure: true
+  slack:
+    webhookUrl: ""  # Add Slack webhook URL if desired

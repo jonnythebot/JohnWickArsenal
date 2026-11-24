@@ -354,3 +354,66 @@ Generated 6 display prefabs!
 | **Scripting Define** | Add `JWA_COSMETIC_ONLY` to Player Settings → Scripting Define Symbols |
 
 **That's it.** Once these two steps are done, the 6 GLB models + ClassicBlackSuit can be imported and previewed.
+
+---
+
+## 11. Unity Cloud Build Cosmetic Preview Configuration
+
+### Cloud Build Preparation Status
+
+| Item | Status | Details |
+|------|--------|---------|
+| glTFast in manifest | ✅ Added | `com.unity.cloud.gltfast`: "6.3.2" |
+| Cosmetic-only define | ✅ Configured | `JWA_COSMETIC_ONLY` in cloud build config |
+| Gameplay scripts excluded | ✅ Configured | Main assembly excluded via cloud build config |
+| Preview scene | ✅ Created | `JWA_CosmeticPreviewSceneSetup.cs` |
+| Cloud build config | ✅ Created | `unitycloudbuild.yaml` + `JWA_CloudBuildConfig.cs` |
+| Cosmetic preview scene | ✅ Scripted | `JWA_CosmeticPreviewSceneSetup.cs` |
+
+### Cloud Build Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `unitycloudbuild.yaml` | Unity Cloud Build configuration for cosmetic preview |
+| `Assets/JohnWickArsenal/Editor/JWA_CloudBuildConfig.cs` | Pre/post-export methods for Cloud Build |
+| `Assets/JohnWickArsenal/Editor/JWA_CosmeticPreviewSceneSetup.cs` | Creates cosmetic preview scene |
+
+### Cloud Build Requirements
+
+| Requirement | Status |
+|-------------|--------|
+| glTFast in manifest | ✅ Added (`com.unity.cloud.gltfast`: "6.3.2") |
+| Cosmetic-only define | ✅ `JWA_COSMETIC_ONLY` in cloud build config |
+| Gameplay assemblies excluded | ✅ Main assembly excluded in cloud config |
+| Cosmetic asmdef isolated | ✅ No B&S references |
+| glTFast version | ✅ 6.3.2 (compatible with Unity 2022.3.20f1) |
+
+### Cloud Build Pipeline
+
+The cloud build pipeline for cosmetic preview:
+
+1. **Pre-export**: Apply `JWA_COSMETIC_ONLY` define, disable gameplay assemblies
+2. **Import**: Import GLB models via glTFast
+3. **Generate**: Create display prefabs via `JWA_DisplayPrefabGenerator`
+4. **Build**: Build Addressables content for cosmetic assets
+5. **Package**: Build Android AssetBundle for cosmetic preview
+5. **Deploy**: Upload build artifacts to Unity Cloud
+
+### Next Steps for Cloud Build
+
+1. **Set up Unity Cloud project** at build.unity3d.com
+2. **Link GitHub repository** to Unity Cloud Build
+3. **Configure build target** using `unitycloudbuild.yaml` settings
+4. **Set environment variable** `JWA_COSMETIC_ONLY=1` in Cloud Build environment
+5. **Trigger first build** and verify cosmetic preview builds successfully
+
+### Remaining Blockers for Cloud Preview
+
+| Blocker | Resolution |
+|---------|------------|
+| Unity Cloud project setup | Create project at build.unity3d.com, link GitHub repo |
+| Cloud Build credentials | Configure Unity Cloud credentials in GitHub Actions secrets |
+| First build verification | Trigger first build, verify cosmetic assets load correctly |
+
+---
+
