@@ -6,6 +6,7 @@ namespace JohnWickArsenal.Editor
 {
     /// <summary>
     /// Generates nonfunctional cosmetic display prefabs from GLB models.
+    /// Requires: com.unity.cloud.gltfast (glTFast) package for GLB import.
     /// Run via: Tools > John Wick Arsenal > Generate Display Prefabs
     /// </summary>
     public class JWA_DisplayPrefabGenerator : EditorWindow
@@ -24,7 +25,7 @@ namespace JohnWickArsenal.Editor
 
             int created = 0;
 
-            // 1. TTI Pit Viper (already exists as DisplayPistol_TTI_PitViper)
+            // 1. TTI Pit Viper
             created += CreateDisplayPrefab(basePath, modelsPath, 
                 "TTI_PitViper", "Models/Pistols/TTI_PitViper.glb",
                 "DisplayPistol_TTI_PitViper", "Pistol");
@@ -70,7 +71,7 @@ namespace JohnWickArsenal.Editor
             var modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(fullModelPath);
             if (modelAsset == null)
             {
-                Debug.LogWarning($"[JWA_DisplayPrefabGenerator] Model not found: {fullModelPath}");
+                Debug.LogWarning($"[JWA_DisplayPrefabGenerator] Model not found: {fullModelPath}. Ensure glTFast is installed and model imported.");
                 return 0;
             }
 

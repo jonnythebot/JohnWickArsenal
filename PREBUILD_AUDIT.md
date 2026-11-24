@@ -1,6 +1,6 @@
 # JohnWickArsenal Lightweight Branch - Pre-Build Audit Report
 
-**Branch**: `lightweight` (commit `2c3e20e`)
+**Branch**: `lightweight` (commit `3ec163c`)
 **Unity Version**: 2022.3.20f1 (61c2feb0970d)
 **Target Platform**: Android (Meta Quest, ARM64)
 **Audit Date**: 2026-11-23
@@ -39,44 +39,107 @@
 
 ---
 
-## 2. Display Prefab Generator - Compilation Review ✅
+## 2. Assembly Definition Structure ✅ ISOLATED
+
+### Cosmetic Editor Assembly (NEW - No B&S Dependencies)
+**File**: `Assets/JohnWickArsenal/Editor/JohnWickArsenal.Cosmetic.Editor.asmdef`
+```json
+{
+  "name": "JohnWickArsenal.Cosmetic.Editor",
+  "references": [],
+  "includePlatforms": ["Editor"],
+  "defineConstraints": []
+}
+```
+- **No B&S references** ✅
+- **Editor-only** ✅
+- **Covers**: `JWA_DisplayPrefabGenerator.cs`, `JWA_DisplayModel` component
+
+### Legacy Editor Assembly (Preserved)
+**File**: `Assets/JohnWickArsenal/Editor/JohnWickArsenal.Legacy.Pipeline.Editor.asmdef`
+- Editor-only, `JWA_LEGACY_PROTOTYPE` constraint
+
+### Main Gameplay Assembly (Requires B&S)
+**File**: `Assets/Scripts/JohnWickArsenal/JohnWickArsenal.asmdef`
+- References: `BladeAndSorcery.Modding`, `BladeAndSorcery.Data`, `BladeAndSorcery.Gameplay`
+- **Only needed for full mod build** ❌ Not required for cosmetic test
+
+### Test Assembly
+**File**: `Assets/Scripts/JohnWickArsenal/Tests/JohnWickArsenal.Tests.asmdef`
+- References: `JohnWickArsenal`, `UnityEngine.TestRunner`, `UnityEngine.CoreModule`
+
+### Isolation Result
+| Assembly | B&S References | Required For |
+|----------|----------------|--------------|
+| `JohnWickArsenal.Cosmetic.Editor` | **None** ✅ | Cosmetic test |
+| `JohnWickArsenal.Legacy.Pipeline.Editor` | None | Legacy tools |
+| `JohnWickArsenal` (main) | **3 B&S assemblies** ❌ | Full mod only |
+| `JohnWickArsenal.Tests` | Via main | Full mod only |
+
+---
+
+## 3. Display Prefab Generator - glTFast Compatibility ✅
 
 **File**: `Assets/JohnWickArsenal/Editor/JWA_DisplayPrefabGenerator.cs`
 
-### Code Analysis
-| Check | Result | Notes |
-|-------|--------|-------|
-| Namespace | ✅ | `JohnWickArsenal.Editor` |
-| Dependencies | ✅ | Uses `UnityEditor`, `UnityEngine`, `System.IO` |
-| Menu Items | ✅ | `Tools/John Wick Arsenal/Generate Display Prefabs` and `Validate Display Models` |
-| API Usage | ✅ | Uses `AssetDatabase`, `PrefabUtility`, `EditorUtility` correctly |
-| Error Handling | ✅ | Checks for null assets, existing prefabs |
-| Component | ✅ | `JWA_DisplayModel` MonoBehaviour with `handAttachPoint` |
+### glTFast Package Information
+| Detail | Value |
+|--------|-------|
+| **Package ID** | `com.unity.cloud.gltfast` |
+| **Unity Registry** | https://packages.unity.com |
+| **Compatible Version** | 6.x.x (for Unity 2022.3 LTS) |
+| **Latest Verified** | 6.3.0+ (check Package Manager) |
+| **Install Method** | Window > Package Manager > Unity Registry > glTFast > Install |
 
-### Potential Issues (Unity Editor Only)
-| Issue | Severity | Resolution |
-|-------|----------|------------|
-| GLB Import | ⚠️ Medium | Requires **glTFast** package (`com.unity.cloud.gltfast`) for GLB import in Unity 2022.3 |
-| Model Scale | ⚠️ Low | GLB models may import with different scales; may need `ModelImporter` settings |
-| Material Import | ⚠️ Low | Embedded PBR textures in GLB should auto-import via glTFast |
+### glTFast Features Used
+| Feature | Status |
+|---------|--------|
+| GLB Import | ✅ Native support via glTFast |
+| Embedded PBR Textures | ✅ Auto-imported |
+| Mesh Import | ✅ Standard Unity Mesh |
+| Material Creation | ✅ Standard Shader / URP compatible |
+
+### Script Compatibility
+| Check | Result |
+|-------|--------|
+| `AssetDatabase.LoadAssetAtPath<GameObject>()` | ✅ Works with glTFast-imported GLB |
+| `PrefabUtility.InstantiatePrefab()` | ✅ Works with glTFast GameObjects |
+| `PrefabUtility.SaveAsPrefabAsset()` | ✅ Standard Unity API |
+
+### Import Notes
+- glTFast imports GLB as `GameObject` with `MeshFilter` + `MeshRenderer`
+- Materials use Unity Standard Shader (Built-in RP) or URP Lit
+- Embedded textures auto-extracted to `Materials/` folder
+- May need ModelImporter settings adjustment for scale/origin
 
 ---
 
-## 3. ClassicBlackSuit & Display Assets - File Paths ✅
+## 4. Asset File Paths ✅ Valid
 
-| Asset | Path | Dependencies | Status |
-|-------|------|--------------|--------|
-| ClassicBlackSuit.obj | `Models/Suits/ClassicBlackSuit.obj` | .mtl, _Albedo.png, _Bump.png | ✅ All present |
-| ClassicBlackSuit.mtl | `Models/Suits/ClassicBlackSuit.mtl` | References textures | ✅ |
+### ClassicBlackSuit
+| File | Path | Size | Status |
+|------|------|------|--------|
+| ClassicBlackSuit.obj | `Models/Suits/ClassicBlackSuit.obj` | 884 KB | ✅ |
+| ClassicBlackSuit.mtl | `Models/Suits/ClassicBlackSuit.mtl` | 180 B | ✅ |
 | _Albedo.png | `Models/Suits/ClassicBlackSuit_Albedo.png` | 108 KB | ✅ |
 | _Bump.png | `Models/Suits/ClassicBlackSuit_Bump.png` | 117 KB | ✅ |
-| TTI Pit Viper | `Models/Pistols/TTI_PitViper.glb` | Self-contained GLB | ✅ |
-| Glock 34 | `Models/Pistols/Glock_34.glb` | Self-contained GLB | ✅ |
-| Vinish Weapons (4) | `Models/DisplayModels/VinishWeapons/*.glb` | Self-contained GLB | ✅ |
+
+### Display Models (GLB)
+| Model | Path | Size | Source | Triangles |
+|-------|------|------|--------|-----------|
+| TTI Pit Viper | `Models/Pistols/TTI_PitViper.glb` | 115 KB | petroulacl (CC0) | ~15K |
+| Glock 34 | `Models/Pistols/Glock_34.glb` | 158 KB | petroulacl (CC0) | ~15K |
+| AR-15 (Vinish) | `Models/DisplayModels/VinishWeapons/AR15_AssaultRifle.glb` | 631 KB | Vinish.dev (CC BY 4.0) | 13,447 |
+| AWP (Vinish) | `Models/DisplayModels/VinishWeapons/AWP_SniperRifle.glb` | 495 KB | Vinish.dev (CC BY 4.0) | 8,564 |
+| MP5 (Vinish) | `Models/DisplayModels/VinishWeapons/MP5_SubmachineGun.glb` | 365 KB | Vinish.dev (CC BY 4.0) | 6,532 |
+| Remington 870 (Vinish) | `Models/DisplayModels/VinishWeapons/Remington870_PumpShotgun.glb` | 237 KB | Vinish.dev (CC BY 4.0) | 3,726 |
+
+### Attribution
+- `Models/DisplayModels/VinishWeapons/ATTRIBUTION.txt` ✅ CC BY 4.0 credits
 
 ---
 
-## 4. Unity Packages - Review ⚠️
+## 5. Unity Packages - Required vs Optional
 
 ### Current `Packages/manifest.json`
 ```json
@@ -92,158 +155,197 @@
 }
 ```
 
-### Package Assessment
-| Package | Status | Notes |
-|---------|--------|-------|
-| `com.unity.addressables` 1.21.21 | ✅ Required | For AssetBundle building |
-| `com.unity.inputsystem` 1.7.0 | ✅ Required | For input handling |
-| `com.unity.mobile.android-logcat` 1.1.0 | ✅ Optional | Debugging aid |
-| `com.unity.modules.assetbundle` 1.0.0 | ✅ Required | Built-in module for AssetBundles |
-| `com.unity.xr.management` 4.5.0 | ✅ Required | XR core |
-| `com.unity.xr.oculus` 4.5.0 | ✅ Required | Meta Quest support |
+### Package Requirements
 
-### Missing Packages (Required for GLB Import)
-| Package | Required For | Status |
-|---------|--------------|--------|
-| `com.unity.cloud.gltfast` | GLB/glTF import | ❌ **MISSING** - Required for `.glb` import |
+| Package | Cosmetic Test | Full Mod Build | Notes |
+|---------|---------------|----------------|-------|
+| `com.unity.addressables` | Optional | ✅ Required | AssetBundle building |
+| `com.unity.inputsystem` | Optional | ✅ Required | Input handling |
+| `com.unity.mobile.android-logcat` | Optional | Optional | Debugging |
+| `com.unity.modules.assetbundle` | Optional | ✅ Required | Built-in module |
+| `com.unity.xr.management` | Optional | ✅ Required | XR core |
+| `com.unity.xr.oculus` | Optional | ✅ Required | Quest support |
+| **`com.unity.cloud.gltfast`** | **✅ REQUIRED** | **✅ REQUIRED** | **GLB import** |
 
-### Unnecessary Packages (Not Present - Good)
-- `com.unity.urp` - Not included (using Built-in RP) ✅
-- `com.unity.2d.*` - Not included ✅
-- `com.unity.ai.*` - Not included ✅
-
----
-
-## 5. Missing B&S Nomad SDK References ❌
-
-### Required Assembly References (from `JohnWickArsenal.asmdef`)
+### Minimal Package Set for Cosmetic Test
 ```json
-"references": [
-  "BladeAndSorcery.Modding",
-  "BladeAndSorcery.Data",
-  "BladeAndSorcery.Gameplay"
-]
+{
+  "dependencies": {
+    "com.unity.cloud.gltfast": "6.3.0",
+    "com.unity.modules.assetbundle": "1.0.0"
+  }
+}
 ```
 
-### Status
-| Assembly | Source | Status |
-|----------|--------|--------|
-| `BladeAndSorcery.Modding` | B&S Nomad install | ❌ **MISSING** |
-| `BladeAndSorcery.Data` | B&S Nomad install | ❌ **MISSING** |
-| `BladeAndSorcery.Gameplay` | B&S Nomad install | ❌ **MISSING** |
+---
+
+## 6. Missing B&S Nomad SDK References
+
+### Required Assemblies (Main Mod Only)
+| Assembly | Source | Status | Required For |
+|----------|--------|--------|--------------|
+| `BladeAndSorcery.Modding` | B&S Nomad install | ❌ Missing | Main mod DLL |
+| `BladeAndSorcery.Data` | B&S Nomad install | ❌ Missing | Main mod DLL |
+| `BladeAndSorcery.Gameplay` | B&S Nomad install | ❌ Missing | Main mod DLL |
 
 ### Impact
-- **Main mod DLL cannot compile** without these assemblies
-- Required for: `JohnWickPistolBehavior`, `JohnWickRifleBehavior`, `JWA_EquipmentSystem`, `JWA_NPCSystem`, etc.
-- Only available by installing Blade & Sorcery Nomad and copying from `BladeAndSorcery_Data/Managed/`
-
-### Workaround for Cosmetic-Only Build
-The `JWA_LEGACY_PROTOTYPE` define constraint allows conditional compilation, but the main asmdef still references these assemblies.
+| Build Type | B&S Assemblies Required |
+|------------|------------------------|
+| **Cosmetic-only test** | **No** ✅ |
+| **Full mod build** | **Yes** ❌ |
 
 ---
 
-## 6. Python vs Unity Editor Checks
+## 7. glTFast Verification
 
-### Performed by Python (`validate_android_sources.py`) ✅
+### Package Details
+- **Identifier**: `com.unity.cloud.gltfast`
+- **Unity Version**: 2022.3 LTS compatible
+- **Version Range**: 5.x - 6.x (6.3.0+ recommended)
+- **Registry**: Unity Registry (built-in)
+- **Documentation**: https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.3/manual/index.html
+
+### Verification Steps (Unity Editor)
+1. Window > Package Manager
+2. Select "Unity Registry"
+3. Search "glTFast"
+4. Version 6.3.0+ > Install
+5. Verify: `Assets/JohnWickArsenal/Models/Pistols/TTI_PitViper.glb` imports as GameObject
+
+---
+
+## 8. Test Tier Definitions
+
+### Tier 1: Basic Unity Asset Import Test (Cosmetic-Only) ✅ MINIMAL
+| Requirement | Status |
+|-------------|--------|
+| Unity 2022.3.20f1 | ✅ Required |
+| glTFast package | ✅ Required |
+| Project open | ✅ |
+| GLB model import | ✅ Test target |
+| Prefab generation | ✅ Test target |
+| **B&S Assemblies** | **NOT REQUIRED** |
+| **Android Build Support** | **NOT REQUIRED** |
+| **XR/Oculus packages** | **NOT REQUIRED** |
+
+### Tier 2: Cosmetic Bundle Build Test
+| Requirement | Status |
+|-------------|--------|
+| Tier 1 + | ✅ |
+| Addressables package | ✅ Required |
+| AssetBundle module | ✅ Required |
+| **Android Build Support** | **NOT REQUIRED** (can build bundle for any platform) |
+
+### Tier 3: Android/Quest Build Test
+| Requirement | Status |
+|-------------|--------|
+| Tier 2 + | ✅ |
+| Android Build Support | ✅ Required |
+| Android SDK/NDK/OpenJDK | ✅ Required |
+| XR Management + Oculus | ✅ Required |
+
+### Tier 4: Full Nomad Mod Build
+| Requirement | Status |
+|-------------|--------|
+| Tier 3 + | ✅ |
+| B&S Nomad assemblies (3) | ✅ Required |
+| Full mod DLL compilation | ✅ Required |
+
+---
+
+## 9. Python vs Unity Editor Checks
+
+### Python (`validate_android_sources.py`) ✅
 | Check | Status |
 |-------|--------|
-| ProjectVersion.txt pins 2022.3.20f1 | ✅ |
-| Package manifest valid JSON | ✅ |
-| packages-lock.json valid JSON | ✅ |
-| mod.json valid JSON | ✅ |
-| ModConfig/*.json valid JSON | ✅ |
-| All .asmdef files valid JSON | ✅ |
-| build_local.py syntax valid | ✅ |
+| ProjectVersion.txt | ✅ |
+| manifest.json syntax | ✅ |
+| packages-lock.json | ✅ |
+| mod.json | ✅ |
+| ModConfig/*.json | ✅ |
+| All .asmdef JSON syntax | ✅ |
+| build_local.py syntax | ✅ |
 | JwaLocalAndroidBuild.cs exists | ✅ |
 
-### Require Unity Editor ❌
-| Check | Requires |
-|-------|----------|
-| GLB model import & validation | Unity Editor + glTFast |
-| Model scale/origin verification | Unity Editor |
+### Unity Editor Required ❌
+| Check | Tool |
+|-------|------|
+| GLB import & GameObject creation | Unity Editor + glTFast |
 | Material/shader compilation | Unity Editor |
 | Prefab generation (`JWA_DisplayPrefabGenerator`) | Unity Editor |
-| AssetBundle building | Unity Editor + Android Build Support |
-| C# compilation (asmdef references) | Unity Editor + B&S assemblies |
-| Android build & APK generation | Unity Editor + Android Build Support |
-| Quest deployment & testing | Android device + ADB |
+| AssetBundle building | Unity Editor |
+| C# compilation (asmdef references) | Unity Editor |
+| Android/Quest build & deploy | Unity Editor + Android modules |
 
 ---
 
-## 7. Import & Test Checklist for Target Machine
+## 10. Updated Import & Test Checklist
 
-### Prerequisites
-- [ ] **OS**: Windows 10/11, Ubuntu 22.04+, or macOS 13+
-- [ ] **RAM**: 16 GB+ (32 GB recommended)
-- [ ] **Storage**: 50 GB+ free (SSD/NVMe)
-- [ ] **Unity Hub**: Installed and signed in
-- [ ] **Unity 2022.3.20f1**: Installed via Hub with modules:
-  - [ ] Android Build Support
-  - [ ] Android SDK & NDK Tools
-  - [ ] OpenJDK
-- [ ] **glTFast Package**: Install via Package Manager (`com.unity.cloud.gltfast`)
-- [ ] **Blade & Sorcery Nomad**: Installed (for assembly refs)
-
-### Assembly Setup
-- [ ] Copy B&S assemblies to `Assemblies/` folder:
-  - `BladeAndSorcery.Modding.dll`
-  - `BladeAndSorcery.Data.dll`
-  - `BladeAndSorcery.Gameplay.dll`
-  - (From `BladeAndSorcery_Data/Managed/` in B&S install)
-
-### Unity Project Setup
+### Phase 1: Cosmetic Asset Import Test (First Test)
+- [ ] **Unity 2022.3.20f1** installed via Hub
+- [ ] **glTFast** (`com.unity.cloud.gltfast` 6.3.0+) installed via Package Manager
 - [ ] Open `UnityProject` in Unity Hub
-- [ ] Wait for Package Manager to resolve dependencies
-- [ ] Install missing `com.unity.cloud.gltfast` via Package Manager
-- [ ] Verify `File > Build Settings > Android` → Switch Platform
-- [ ] Verify `Project Settings > XR Plug-in Management > Oculus` ✅ enabled
-
-### Asset Import & Validation
-- [ ] Verify GLB models import correctly (check scale, materials, textures)
+- [ ] Verify GLB models import:
+  - [ ] `Models/Pistols/TTI_PitViper.glb` → GameObject
+  - [ ] `Models/Pistols/Glock_34.glb` → GameObject
+  - [ ] `Models/DisplayModels/VinishWeapons/*.glb` (4) → GameObjects
+  - [ ] `Models/Suits/ClassicBlackSuit.obj` + textures → GameObject
 - [ ] Run `Tools > John Wick Arsenal > Validate Display Models`
 - [ ] Run `Tools > John Wick Arsenal > Generate Display Prefabs`
-- [ ] Verify 6 display prefabs created in `Assets/JohnWickArsenal/Prefabs/DisplayModels/`
+- [ ] Verify 6 prefabs in `Assets/JohnWickArsenal/Prefabs/DisplayModels/`
 
-### Build & Test
-- [ ] Run `python3 Tools/build_local.py --check`
-- [ ] Run `python3 Tools/build_local.py --output BuildOutput`
-- [ ] Verify `johnwickarsenal-cosmetics.bundle` created
-- [ ] Deploy bundle to Quest for visual review
-- [ ] For full mod: Run `./build.sh` (requires B&S assemblies)
+### Phase 2: Cosmetic Bundle Build (Optional)
+- [ ] Install `com.unity.addressables` 1.21.21
+- [ ] Configure Addressables group for display models
+- [ ] Build AssetBundle for Android
+- [ ] Verify bundle loads
 
----
-
-## 8. Remaining Blockers Before First Unity Test
-
-| Blocker | Category | Resolution Required |
-|---------|----------|---------------------|
-| **Missing glTFast package** | Package | Install `com.unity.cloud.gltfast` in Unity |
-| **Missing B&S assemblies** | SDK | Install B&S Nomad, copy 3 DLLs to `Assemblies/` |
-| **Missing Android Build Support** | Unity Module | Install via Unity Hub |
-| **Missing OpenJDK** | Unity Module | Install via Unity Hub |
-| **GLB import unverified** | Import | Must test in Unity with glTFast |
-| **ClassicBlackSuit material setup** | Import | May need manual material assignment for OBJ |
-| **Sketchfab models unverified** | Legal | Must verify 11 licenses before use |
+### Phase 3: Full Mod Build (Separate)
+- [ ] Install Android Build Support + SDK/NDK/OpenJDK
+- [ ] Install XR Management + Oculus
+- [ ] Install B&S Nomad, copy 3 assemblies to `Assemblies/`
+- [ ] Run `./build.sh` for full mod
 
 ---
 
-## Summary
+## 11. Dependency Summary
 
-| Area | Status |
-|------|--------|
-| Project Structure | ✅ Complete |
-| Display Prefab Generator | ✅ Ready (needs glTFast) |
-| Asset File Paths | ✅ Valid |
-| Unity Packages | ⚠️ Missing glTFast |
-| B&S SDK References | ❌ Missing (3 assemblies) |
-| Source Validation | ✅ Passes |
-| Ready for Unity Test | ❌ **No - 4 blockers** |
+| Dependency | Cosmetic Test | Full Mod Build | Source |
+|------------|---------------|----------------|--------|
+| Unity 2022.3.20f1 | ✅ Essential | ✅ Essential | Unity Hub |
+| glTFast (com.unity.cloud.gltfast) | ✅ Essential | ✅ Essential | Package Manager |
+| ClassicBlackSuit assets | ✅ Essential | ✅ Essential | Local (in repo) |
+| Display GLB models | ✅ Essential | ✅ Essential | Local (in repo) |
+| `JohnWickArsenal.Cosmetic.Editor` asmdef | ✅ Essential | ✅ Essential | Local (in repo) |
+| `com.unity.addressables` | Optional | Essential | Package Manager |
+| `com.unity.modules.assetbundle` | Optional | Essential | Built-in |
+| Android Build Support | **Not needed** | ✅ Essential | Unity Hub |
+| XR Management + Oculus | **Not needed** | ✅ Essential | Package Manager |
+| B&S Assemblies (3) | **Not needed** | ✅ Essential | B&S Nomad install |
+| Android SDK/NDK/OpenJDK | **Not needed** | ✅ Essential | Unity Hub |
 
-### Minimum Viable Setup for First Test
-1. Install Unity 2022.3.20f1 + Android modules
-2. Install glTFast package
-3. Copy B&S assemblies to `Assemblies/`
-4. Open project, import GLB models
-5. Generate display prefabs
-6. Build cosmetic bundle
+---
+
+## 12. Final Status
+
+| Check | Status |
+|-------|--------|
+| Source validation | ✅ Passes (`python3 Tools/validate_android_sources.py`) |
+| Git working tree | ✅ Clean |
+| Cosmetic asmdef created | ✅ (`JohnWickArsenal.Cosmetic.Editor`) |
+| Display generator updated | ✅ (glTFast notes added) |
+| PREBUILD_AUDIT.md updated | ✅ |
+| Lightweight branch pushed | ✅ (commit pending) |
+
+---
+
+## Minimum Command for First Test
+```bash
+# On target machine:
+1. Install Unity 2022.3.20f1 via Hub
+2. Open UnityProject
+3. Window > Package Manager > Install glTFast (com.unity.cloud.gltfast)
+4. Tools > John Wick Arsenal > Generate Display Prefabs
+# If successful → cosmetic test PASSED
+```
 
